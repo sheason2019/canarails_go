@@ -5,13 +5,11 @@ import (
 	"os"
 
 	"canarails.dev/database/models"
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func initDb() *gorm.DB {
-	godotenv.Load("../.env")
 	databaseUrl := os.Getenv("DATABASE_URL")
 
 	db, err := gorm.Open(
@@ -22,11 +20,7 @@ func initDb() *gorm.DB {
 		panic(fmt.Errorf("open database error: %w", err))
 	}
 
-	err = db.AutoMigrate(
-		&models.App{},
-		&models.AppVariant{},
-		&models.AppDeploy{},
-	)
+	err = db.AutoMigrate(models.Models...)
 	if err != nil {
 		panic(fmt.Errorf("auto migrate error: %w", err))
 	}

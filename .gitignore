@@ -1,1 +1,3 @@
 .env
+# 由 GORM Gen 自动生成的查询代码
+query

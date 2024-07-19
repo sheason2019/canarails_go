@@ -1,0 +1,6 @@
+package: genapi
+output: ../../apis/genapi/server.gen.go
+generate:
+  models: true
+  echo-server: true
+  strict-server: true

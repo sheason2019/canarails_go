@@ -4,4 +4,6 @@ var Models = []any{
 	&App{},
 	&AppVariant{},
 	&AppDeploy{},
+	&PersistData{},
+	&User{},
 }

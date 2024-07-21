@@ -1,0 +1,6 @@
+package envsvc
+
+const (
+	ADMIN_PASSWORD = "ADMIN_PASSWORD"
+	DATABASE_URL   = "DATABASE_URL"
+)

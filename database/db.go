@@ -5,12 +5,13 @@ import (
 	"os"
 
 	"canarails.dev/database/models"
+	"canarails.dev/services/envsvc"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func initDb() *gorm.DB {
-	databaseUrl := os.Getenv("DATABASE_URL")
+	databaseUrl := os.Getenv(envsvc.DATABASE_URL)
 
 	db, err := gorm.Open(
 		postgres.Open(databaseUrl),

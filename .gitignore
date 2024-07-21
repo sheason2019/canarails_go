@@ -1,6 +1,4 @@
 .env
 bin
-# 由 GORM Gen 自动生成的查询代码
-query
 node_modules
 tsp-output

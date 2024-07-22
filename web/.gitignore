@@ -1,15 +1,31 @@
-# Local
 .DS_Store
-*.local
+
+.pnp
+.pnp.js
+.env.local
+.env.*.local
+.history
 *.log*
 
-# Dist
-node_modules
+node_modules/
+.yarn-integrity
+.pnpm-store/
+*.tsbuildinfo
+.eslintcache
+.changeset/pre.json
+
 dist/
+coverage/
+release/
+output/
+output_resource/
+log/
 
-# IDE
-.vscode/*
+.vscode/**/*
+!.vscode/settings.json
 !.vscode/extensions.json
-.idea
+.idea/
 
-api-gen.d.ts
+**/*/typings/auto-generated
+
+modern.config.local.*

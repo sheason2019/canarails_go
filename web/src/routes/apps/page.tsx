@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import NewAppButton from './components/new-app-button';
+import AppList from './components/app-list';
 
 export default function Apps() {
   return (
@@ -7,9 +8,10 @@ export default function Apps() {
       <Typography variant="h4" sx={{ mt: 2 }}>
         Apps
       </Typography>
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ my: 2 }}>
         <NewAppButton />
       </Box>
+      <AppList />
     </main>
   );
 }

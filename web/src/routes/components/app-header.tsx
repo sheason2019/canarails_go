@@ -20,7 +20,11 @@ export default function AppHeader() {
           <Box
             component={Link}
             to="/"
-            sx={{ color: 'inherit', textDecoration: 'none' }}
+            sx={{
+              color: 'inherit',
+              textDecoration: 'none',
+              userSelect: 'none',
+            }}
           >
             Canarails
           </Box>

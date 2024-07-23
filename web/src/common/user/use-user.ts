@@ -5,8 +5,13 @@ import { api } from '@/api/api';
 export default function useUser() {
   const { token, setToken } = useToken();
 
-  const { data, error, mutate } = useSWR(['auth/user', token], () =>
-    api.GET('/api/auth', { params: { header: { authorization: token } } }),
+  const { data, error, mutate } = useSWR(
+    ['auth/user', token],
+    () =>
+      api.GET('/api/auth', { params: { header: { authorization: token } } }),
+    {
+      shouldRetryOnError: false,
+    },
   );
 
   const logout = () => {

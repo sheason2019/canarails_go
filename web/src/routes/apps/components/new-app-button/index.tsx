@@ -51,6 +51,10 @@ export default function NewAppButton() {
 
   const { getFieldProperties } = useFieldProperties(formik);
 
+  const handleClose = () => {
+    if (!formik.isSubmitting) onClose();
+  };
+
   useEffect(() => {
     formik.resetForm();
   }, [isOpen]);
@@ -62,7 +66,7 @@ export default function NewAppButton() {
       </Button>
       <Dialog
         open={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         fullWidth
         maxWidth="sm"
         aria-labelledby="退出登录"
@@ -90,8 +94,14 @@ export default function NewAppButton() {
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button onClick={onClose}>取消</Button>
-            <Button variant="contained" type="submit">
+            <Button onClick={handleClose} disabled={formik.isSubmitting}>
+              取消
+            </Button>
+            <Button
+              variant="contained"
+              type="submit"
+              disabled={formik.isSubmitting}
+            >
               提交
             </Button>
           </DialogActions>

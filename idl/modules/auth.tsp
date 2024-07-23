@@ -11,9 +11,12 @@ model LoginReq {
 }
 
 model LoginRes {
+  token: string;
+}
+
+model AuthRes {
   id: int32;
   username: string;
-  token: string;
   expireAt: int64;
 }
 
@@ -22,8 +25,8 @@ model LoginRes {
 interface Auth {
   @post
   @route("login")
-  login(
-    @body loginReq: LoginReq,
-    @header authorization: string,
-  ): LoginRes;
+  login(@body loginReq: LoginReq): LoginRes;
+
+  @get
+  auth(@header authorization: string): AuthRes;
 }

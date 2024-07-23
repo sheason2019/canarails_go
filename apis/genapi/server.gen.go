@@ -14,6 +14,13 @@ import (
 	strictecho "github.com/oapi-codegen/runtime/strictmiddleware/echo"
 )
 
+// AuthRes defines model for AuthRes.
+type AuthRes struct {
+	ExpireAt int64  `json:"expireAt"`
+	Id       int32  `json:"id"`
+	Username string `json:"username"`
+}
+
 // LoginReq defines model for LoginReq.
 type LoginReq struct {
 	Password string `json:"password"`
@@ -22,14 +29,11 @@ type LoginReq struct {
 
 // LoginRes defines model for LoginRes.
 type LoginRes struct {
-	ExpireAt int64  `json:"expireAt"`
-	Id       int32  `json:"id"`
-	Token    string `json:"token"`
-	Username string `json:"username"`
+	Token string `json:"token"`
 }
 
-// AuthLoginParams defines parameters for AuthLogin.
-type AuthLoginParams struct {
+// AuthAuthParams defines parameters for AuthAuth.
+type AuthAuthParams struct {
 	Authorization string `json:"authorization"`
 }
 
@@ -39,8 +43,11 @@ type AuthLoginJSONRequestBody = LoginReq
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
+	// (GET /api/auth)
+	AuthAuth(ctx echo.Context, params AuthAuthParams) error
+
 	// (POST /api/auth/login)
-	AuthLogin(ctx echo.Context, params AuthLoginParams) error
+	AuthLogin(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -48,12 +55,12 @@ type ServerInterfaceWrapper struct {
 	Handler ServerInterface
 }
 
-// AuthLogin converts echo context to params.
-func (w *ServerInterfaceWrapper) AuthLogin(ctx echo.Context) error {
+// AuthAuth converts echo context to params.
+func (w *ServerInterfaceWrapper) AuthAuth(ctx echo.Context) error {
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params AuthLoginParams
+	var params AuthAuthParams
 
 	headers := ctx.Request().Header
 	// ------------- Required header parameter "authorization" -------------
@@ -75,7 +82,16 @@ func (w *ServerInterfaceWrapper) AuthLogin(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.AuthLogin(ctx, params)
+	err = w.Handler.AuthAuth(ctx, params)
+	return err
+}
+
+// AuthLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) AuthLogin(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AuthLogin(ctx)
 	return err
 }
 
@@ -107,13 +123,30 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.GET(baseURL+"/api/auth", wrapper.AuthAuth)
 	router.POST(baseURL+"/api/auth/login", wrapper.AuthLogin)
 
 }
 
+type AuthAuthRequestObject struct {
+	Params AuthAuthParams
+}
+
+type AuthAuthResponseObject interface {
+	VisitAuthAuthResponse(w http.ResponseWriter) error
+}
+
+type AuthAuth200JSONResponse AuthRes
+
+func (response AuthAuth200JSONResponse) VisitAuthAuthResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type AuthLoginRequestObject struct {
-	Params AuthLoginParams
-	Body   *AuthLoginJSONRequestBody
+	Body *AuthLoginJSONRequestBody
 }
 
 type AuthLoginResponseObject interface {
@@ -132,6 +165,9 @@ func (response AuthLogin200JSONResponse) VisitAuthLoginResponse(w http.ResponseW
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 
+	// (GET /api/auth)
+	AuthAuth(ctx context.Context, request AuthAuthRequestObject) (AuthAuthResponseObject, error)
+
 	// (POST /api/auth/login)
 	AuthLogin(ctx context.Context, request AuthLoginRequestObject) (AuthLoginResponseObject, error)
 }
@@ -148,11 +184,34 @@ type strictHandler struct {
 	middlewares []StrictMiddlewareFunc
 }
 
-// AuthLogin operation middleware
-func (sh *strictHandler) AuthLogin(ctx echo.Context, params AuthLoginParams) error {
-	var request AuthLoginRequestObject
+// AuthAuth operation middleware
+func (sh *strictHandler) AuthAuth(ctx echo.Context, params AuthAuthParams) error {
+	var request AuthAuthRequestObject
 
 	request.Params = params
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AuthAuth(ctx.Request().Context(), request.(AuthAuthRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AuthAuth")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AuthAuthResponseObject); ok {
+		return validResponse.VisitAuthAuthResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// AuthLogin operation middleware
+func (sh *strictHandler) AuthLogin(ctx echo.Context) error {
+	var request AuthLoginRequestObject
 
 	var body AuthLoginJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {

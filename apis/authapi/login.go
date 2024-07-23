@@ -34,9 +34,6 @@ func (Impl) AuthLogin(
 	}
 
 	return genapi.AuthLogin200JSONResponse(genapi.LoginRes{
-		Id:       int32(usr.ID),
-		Username: usr.Username,
-		Token:    tokenString,
-		ExpireAt: token.ExpiresAt.UnixMilli(),
+		Token: tokenString,
 	}), nil
 }

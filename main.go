@@ -30,5 +30,5 @@ func main() {
 
 	genapi.RegisterHandlers(app, si)
 
-	log.Fatal(app.Start(":8080"))
+	log.Fatal(app.Start(":3000"))
 }

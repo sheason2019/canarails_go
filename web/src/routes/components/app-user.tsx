@@ -1,6 +1,6 @@
 import useUser from '@/common/user/use-user';
 import { Link } from '@modern-js/runtime/router';
-import { Avatar, Button } from '@mui/material';
+import { Avatar, Box, Button } from '@mui/material';
 
 export default function AppUser() {
   const { isLogined } = useUser();
@@ -8,7 +8,13 @@ export default function AppUser() {
   if (!isLogined) {
     return (
       <Button color="inherit">
-        <Link to="/login">登录</Link>
+        <Box
+          component={Link}
+          to="/login"
+          sx={{ color: 'inherit', textDecoration: 'none' }}
+        >
+          登录
+        </Box>
       </Button>
     );
   }

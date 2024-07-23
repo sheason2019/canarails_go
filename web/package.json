@@ -28,7 +28,6 @@
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
     "@fontsource/roboto": "^5.0.13",
-    "@modern-js/plugin-tailwindcss": "2.56.0",
     "@modern-js/runtime": "2.56.0",
     "@mui/icons-material": "^5.16.4",
     "@mui/lab": "5.0.0-alpha.172",
@@ -56,7 +55,6 @@
     "openapi-typescript": "^7.0.4",
     "prettier": "~2.8.1",
     "rimraf": "~3.0.2",
-    "tailwindcss": "~3.3.3",
     "typescript": "~5.0.4"
   }
 }

@@ -10,6 +10,7 @@ import {
   DialogContentText,
   DialogTitle,
   Stack,
+  Typography,
 } from '@mui/material';
 
 export default function LogoutCard() {
@@ -24,7 +25,12 @@ export default function LogoutCard() {
   return (
     <>
       <CardContent component={Stack} alignItems="center">
-        <p className="text-lg text-center font-bold">用户信息</p>
+        <Typography
+          variant="h6"
+          sx={{ textAlign: 'center', fontWeight: 'bold' }}
+        >
+          用户信息
+        </Typography>
         <Avatar sx={{ width: 72, height: 72, mt: 2 }} />
         <Button
           variant="contained"

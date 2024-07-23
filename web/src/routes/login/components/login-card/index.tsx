@@ -2,7 +2,7 @@ import { api } from '@/api/api';
 import useToken from '@/common/user/use-token';
 import useFieldProperties from '@/routes/hooks/use-field-properties';
 import { LoadingButton } from '@mui/lab';
-import { CardContent, Stack, TextField } from '@mui/material';
+import { CardContent, Stack, TextField, Typography } from '@mui/material';
 import { useFormik } from 'formik';
 import { useSnackbar } from 'notistack';
 import * as Yup from 'yup';
@@ -37,7 +37,12 @@ export default function LoginCard() {
   return (
     <CardContent component="form" onSubmit={formik.handleSubmit}>
       <Stack gap={1} sx={{ px: 1 }}>
-        <p className="text-lg text-center font-bold">用户登录</p>
+        <Typography
+          variant="h6"
+          sx={{ textAlign: 'center', fontWeight: 'bold' }}
+        >
+          用户登录
+        </Typography>
         <TextField
           fullWidth
           label="用户名"
@@ -51,17 +56,15 @@ export default function LoginCard() {
           variant="standard"
           {...getFieldProperties('password')}
         />
-        <div className="mt-3">
-          <LoadingButton
-            className="w-full"
-            type="submit"
-            variant="contained"
-            loading={formik.isSubmitting}
-            loadingIndicator="正在登录"
-          >
-            登录
-          </LoadingButton>
-        </div>
+        <LoadingButton
+          type="submit"
+          variant="contained"
+          loading={formik.isSubmitting}
+          loadingIndicator="正在登录"
+          sx={{ mt: 2 }}
+        >
+          登录
+        </LoadingButton>
       </Stack>
     </CardContent>
   );

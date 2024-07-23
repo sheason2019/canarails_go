@@ -1,7 +1,15 @@
-const Index = () => (
-  <div className="container-box">
-    <main>Hello world</main>
-  </div>
-);
+import { useNavigate } from '@modern-js/runtime/router';
+import { useEffect } from 'react';
 
-export default Index;
+export default function Index() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate('/apps');
+  }, []);
+
+  return (
+    <main>
+      <p>Homepage</p>
+    </main>
+  );
+}

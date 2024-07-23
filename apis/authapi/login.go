@@ -6,7 +6,7 @@ import (
 
 	"canarails.dev/apis/genapi"
 	"canarails.dev/query"
-	"canarails.dev/services/authsvc"
+	"canarails.dev/services/authsvc/loginsvc"
 	"canarails.dev/services/authsvc/tokensvc"
 )
 
@@ -22,7 +22,7 @@ func (Impl) AuthLogin(
 		return nil, fmt.Errorf("find user by username error: %w", err)
 	}
 
-	if !authsvc.ComparePassword(request.Body.Password, usr) {
+	if !loginsvc.ComparePassword(request.Body.Password, usr) {
 		return nil, fmt.Errorf("login error: invalid password")
 	}
 

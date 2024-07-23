@@ -7,14 +7,15 @@ import (
 
 	"canarails.dev/database/models"
 	"canarails.dev/query"
+	"canarails.dev/services/authsvc/loginsvc"
 	"gorm.io/gorm"
 )
 
 // 根据环境变量初始化 Admin 用户的密码
 func SetupAdminPassword(ctx context.Context, password string) *models.User {
-	salt := createRandSalt()
+	salt := loginsvc.CreateRandSalt()
 
-	passwordHash := createPasswordHash(password, salt)
+	passwordHash := loginsvc.CreatePasswordHash(password, salt)
 
 	admin, err := query.User.
 		WithContext(ctx).

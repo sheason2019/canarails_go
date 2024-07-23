@@ -1,4 +1,4 @@
-package authsvc
+package loginsvc
 
 import (
 	"bytes"
@@ -10,6 +10,6 @@ func ComparePassword(
 	password string,
 	user *models.User,
 ) bool {
-	currentHash := createPasswordHash(password, user.PasswordSalt)
+	currentHash := CreatePasswordHash(password, user.PasswordSalt)
 	return bytes.Equal(currentHash, user.PasswordHash)
 }

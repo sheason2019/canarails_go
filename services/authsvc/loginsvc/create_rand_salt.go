@@ -1,4 +1,4 @@
-package authsvc
+package loginsvc
 
 import (
 	"crypto/rand"
@@ -7,7 +7,7 @@ import (
 )
 
 // 32 位随机 buffer 作为盐
-func createRandSalt() []byte {
+func CreateRandSalt() []byte {
 	output := make([]byte, 32)
 	_, err := rand.Read(output)
 	if err != nil {

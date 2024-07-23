@@ -14,6 +14,18 @@ import (
 	strictecho "github.com/oapi-codegen/runtime/strictmiddleware/echo"
 )
 
+const (
+	BasicAuthScopes = "BasicAuth.Scopes"
+)
+
+// App defines model for App.
+type App struct {
+	Description string   `json:"description"`
+	Hostnames   []string `json:"hostnames"`
+	Id          int32    `json:"id"`
+	Title       string   `json:"title"`
+}
+
 // AuthRes defines model for AuthRes.
 type AuthRes struct {
 	ExpireAt int64  `json:"expireAt"`
@@ -32,16 +44,57 @@ type LoginRes struct {
 	Token string `json:"token"`
 }
 
+// AppsDeleteJSONBody defines parameters for AppsDelete.
+type AppsDeleteJSONBody struct {
+	Id int32 `json:"id"`
+}
+
+// AppsDeleteParams defines parameters for AppsDelete.
+type AppsDeleteParams struct {
+	Authorization string `json:"authorization"`
+}
+
+// AppsCreateParams defines parameters for AppsCreate.
+type AppsCreateParams struct {
+	Authorization string `json:"authorization"`
+}
+
+// AppsPutParams defines parameters for AppsPut.
+type AppsPutParams struct {
+	Authorization string `json:"authorization"`
+}
+
 // AuthAuthParams defines parameters for AuthAuth.
 type AuthAuthParams struct {
 	Authorization string `json:"authorization"`
 }
+
+// AppsDeleteJSONRequestBody defines body for AppsDelete for application/json ContentType.
+type AppsDeleteJSONRequestBody AppsDeleteJSONBody
+
+// AppsCreateJSONRequestBody defines body for AppsCreate for application/json ContentType.
+type AppsCreateJSONRequestBody = App
+
+// AppsPutJSONRequestBody defines body for AppsPut for application/json ContentType.
+type AppsPutJSONRequestBody = App
 
 // AuthLoginJSONRequestBody defines body for AuthLogin for application/json ContentType.
 type AuthLoginJSONRequestBody = LoginReq
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+
+	// (DELETE /api/app)
+	AppsDelete(ctx echo.Context, params AppsDeleteParams) error
+
+	// (GET /api/app)
+	AppsList(ctx echo.Context) error
+
+	// (POST /api/app)
+	AppsCreate(ctx echo.Context, params AppsCreateParams) error
+
+	// (PUT /api/app)
+	AppsPut(ctx echo.Context, params AppsPutParams) error
 
 	// (GET /api/auth)
 	AuthAuth(ctx echo.Context, params AuthAuthParams) error
@@ -53,6 +106,110 @@ type ServerInterface interface {
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// AppsDelete converts echo context to params.
+func (w *ServerInterfaceWrapper) AppsDelete(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params AppsDeleteParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "authorization" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("authorization")]; found {
+		var Authorization string
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for authorization, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "authorization", valueList[0], &Authorization, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter authorization: %s", err))
+		}
+
+		params.Authorization = Authorization
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter authorization is required, but not found"))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AppsDelete(ctx, params)
+	return err
+}
+
+// AppsList converts echo context to params.
+func (w *ServerInterfaceWrapper) AppsList(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AppsList(ctx)
+	return err
+}
+
+// AppsCreate converts echo context to params.
+func (w *ServerInterfaceWrapper) AppsCreate(ctx echo.Context) error {
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params AppsCreateParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "authorization" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("authorization")]; found {
+		var Authorization string
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for authorization, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "authorization", valueList[0], &Authorization, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter authorization: %s", err))
+		}
+
+		params.Authorization = Authorization
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter authorization is required, but not found"))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AppsCreate(ctx, params)
+	return err
+}
+
+// AppsPut converts echo context to params.
+func (w *ServerInterfaceWrapper) AppsPut(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BasicAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params AppsPutParams
+
+	headers := ctx.Request().Header
+	// ------------- Required header parameter "authorization" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("authorization")]; found {
+		var Authorization string
+		n := len(valueList)
+		if n != 1 {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for authorization, got %d", n))
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "authorization", valueList[0], &Authorization, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter authorization: %s", err))
+		}
+
+		params.Authorization = Authorization
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter authorization is required, but not found"))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AppsPut(ctx, params)
+	return err
 }
 
 // AuthAuth converts echo context to params.
@@ -123,9 +280,83 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.DELETE(baseURL+"/api/app", wrapper.AppsDelete)
+	router.GET(baseURL+"/api/app", wrapper.AppsList)
+	router.POST(baseURL+"/api/app", wrapper.AppsCreate)
+	router.PUT(baseURL+"/api/app", wrapper.AppsPut)
 	router.GET(baseURL+"/api/auth", wrapper.AuthAuth)
 	router.POST(baseURL+"/api/auth/login", wrapper.AuthLogin)
 
+}
+
+type AppsDeleteRequestObject struct {
+	Params AppsDeleteParams
+	Body   *AppsDeleteJSONRequestBody
+}
+
+type AppsDeleteResponseObject interface {
+	VisitAppsDeleteResponse(w http.ResponseWriter) error
+}
+
+type AppsDelete200JSONResponse int32
+
+func (response AppsDelete200JSONResponse) VisitAppsDeleteResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AppsListRequestObject struct {
+}
+
+type AppsListResponseObject interface {
+	VisitAppsListResponse(w http.ResponseWriter) error
+}
+
+type AppsList200JSONResponse []App
+
+func (response AppsList200JSONResponse) VisitAppsListResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AppsCreateRequestObject struct {
+	Params AppsCreateParams
+	Body   *AppsCreateJSONRequestBody
+}
+
+type AppsCreateResponseObject interface {
+	VisitAppsCreateResponse(w http.ResponseWriter) error
+}
+
+type AppsCreate200JSONResponse int32
+
+func (response AppsCreate200JSONResponse) VisitAppsCreateResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AppsPutRequestObject struct {
+	Params AppsPutParams
+	Body   *AppsPutJSONRequestBody
+}
+
+type AppsPutResponseObject interface {
+	VisitAppsPutResponse(w http.ResponseWriter) error
+}
+
+type AppsPut200JSONResponse int32
+
+func (response AppsPut200JSONResponse) VisitAppsPutResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type AuthAuthRequestObject struct {
@@ -165,6 +396,18 @@ func (response AuthLogin200JSONResponse) VisitAuthLoginResponse(w http.ResponseW
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 
+	// (DELETE /api/app)
+	AppsDelete(ctx context.Context, request AppsDeleteRequestObject) (AppsDeleteResponseObject, error)
+
+	// (GET /api/app)
+	AppsList(ctx context.Context, request AppsListRequestObject) (AppsListResponseObject, error)
+
+	// (POST /api/app)
+	AppsCreate(ctx context.Context, request AppsCreateRequestObject) (AppsCreateResponseObject, error)
+
+	// (PUT /api/app)
+	AppsPut(ctx context.Context, request AppsPutRequestObject) (AppsPutResponseObject, error)
+
 	// (GET /api/auth)
 	AuthAuth(ctx context.Context, request AuthAuthRequestObject) (AuthAuthResponseObject, error)
 
@@ -182,6 +425,122 @@ func NewStrictHandler(ssi StrictServerInterface, middlewares []StrictMiddlewareF
 type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
+}
+
+// AppsDelete operation middleware
+func (sh *strictHandler) AppsDelete(ctx echo.Context, params AppsDeleteParams) error {
+	var request AppsDeleteRequestObject
+
+	request.Params = params
+
+	var body AppsDeleteJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AppsDelete(ctx.Request().Context(), request.(AppsDeleteRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AppsDelete")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AppsDeleteResponseObject); ok {
+		return validResponse.VisitAppsDeleteResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// AppsList operation middleware
+func (sh *strictHandler) AppsList(ctx echo.Context) error {
+	var request AppsListRequestObject
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AppsList(ctx.Request().Context(), request.(AppsListRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AppsList")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AppsListResponseObject); ok {
+		return validResponse.VisitAppsListResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// AppsCreate operation middleware
+func (sh *strictHandler) AppsCreate(ctx echo.Context, params AppsCreateParams) error {
+	var request AppsCreateRequestObject
+
+	request.Params = params
+
+	var body AppsCreateJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AppsCreate(ctx.Request().Context(), request.(AppsCreateRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AppsCreate")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AppsCreateResponseObject); ok {
+		return validResponse.VisitAppsCreateResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// AppsPut operation middleware
+func (sh *strictHandler) AppsPut(ctx echo.Context, params AppsPutParams) error {
+	var request AppsPutRequestObject
+
+	request.Params = params
+
+	var body AppsPutJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AppsPut(ctx.Request().Context(), request.(AppsPutRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AppsPut")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AppsPutResponseObject); ok {
+		return validResponse.VisitAppsPutResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
 }
 
 // AuthAuth operation middleware

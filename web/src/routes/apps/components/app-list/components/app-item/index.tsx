@@ -1,7 +1,9 @@
 import { components } from '@/api/api-gen';
 import {
+  Box,
   Button,
   Card,
+  CardActions,
   CardContent,
   Dialog,
   DialogActions,
@@ -56,14 +58,17 @@ export default function AppItem({ app }: Props) {
       <Card>
         <CardContent>
           <Typography variant="h5">{app.title}</Typography>
-          <Typography variant="body1">简介：{app.description}</Typography>
-          <Stack direction="row" justifyContent="space-between" sx={{ mt: 1 }}>
-            <IconButton color="error" onClick={onOpen}>
-              <DeleteIcon />
-            </IconButton>
-            <Button variant="contained">查看详情</Button>
-          </Stack>
+          {app.description.length > 0 && (
+            <Typography variant="body2">{app.description}</Typography>
+          )}
         </CardContent>
+        <CardActions>
+          <IconButton color="error" onClick={onOpen}>
+            <DeleteIcon />
+          </IconButton>
+          <Box sx={{ flex: 1 }} />
+          <Button variant="contained">查看详情</Button>
+        </CardActions>
       </Card>
       <Dialog open={isOpen} onClose={handleClose}>
         <DialogTitle>警告</DialogTitle>

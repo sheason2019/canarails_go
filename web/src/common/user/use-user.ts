@@ -1,11 +1,12 @@
 import useSWR from 'swr';
 import useToken from './use-token';
-import { api } from '@/api/api';
+import useApi from '../use-api';
 
 export default function useUser() {
+  const api = useApi({ toastWhenError: false });
   const { token, setToken } = useToken();
 
-  const { data, error, mutate } = useSWR(
+  const { data, error } = useSWR(
     ['auth/user', token],
     () =>
       api.GET('/api/auth', { params: { header: { authorization: token } } }),

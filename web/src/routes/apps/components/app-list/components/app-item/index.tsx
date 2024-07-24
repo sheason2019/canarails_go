@@ -11,21 +11,22 @@ import {
   DialogContentText,
   DialogTitle,
   IconButton,
-  Stack,
   Typography,
 } from '@mui/material';
 import useSWRMutation from 'swr/mutation';
 import DeleteIcon from '@mui/icons-material/Delete';
 import useDialog from '@/common/use-dialog';
-import { api } from '@/api/api';
 import useToken from '@/common/user/use-token';
 import useAppList from '../../hooks/use-app-list';
+import { Link } from '@modern-js/runtime/router';
+import useApi from '@/common/use-api';
 
 interface Props {
   app: components['schemas']['App'];
 }
 
 export default function AppItem({ app }: Props) {
+  const api = useApi();
   const { token } = useToken();
   const { mutate } = useAppList();
   const { isOpen, onClose, onOpen } = useDialog();
@@ -67,7 +68,9 @@ export default function AppItem({ app }: Props) {
             <DeleteIcon />
           </IconButton>
           <Box sx={{ flex: 1 }} />
-          <Button variant="contained">查看详情</Button>
+          <Link to={`/apps/${app.id}`}>
+            <Button variant="contained">查看详情</Button>
+          </Link>
         </CardActions>
       </Card>
       <Dialog open={isOpen} onClose={handleClose}>

@@ -13,11 +13,13 @@ import { useEffect } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import * as Yup from 'yup';
 import useFieldProperties from '@/routes/hooks/use-field-properties';
-import { api } from '@/api/api';
 import useToken from '@/common/user/use-token';
 import useAppList from '../app-list/hooks/use-app-list';
+import useApi from '@/common/use-api';
 
 export default function NewAppButton() {
+  const api = useApi();
+
   const { token } = useToken();
   const { mutate } = useAppList();
   const { isOpen, onClose, onOpen } = useDialog();

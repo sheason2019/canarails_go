@@ -4,11 +4,18 @@
 package genapi
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
+	"path"
+	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
 	"github.com/oapi-codegen/runtime"
 	strictecho "github.com/oapi-codegen/runtime/strictmiddleware/echo"
@@ -28,7 +35,6 @@ type App struct {
 
 // AuthRes defines model for AuthRes.
 type AuthRes struct {
-	ExpireAt int64  `json:"expireAt"`
 	Id       int32  `json:"id"`
 	Username string `json:"username"`
 }
@@ -96,6 +102,9 @@ type ServerInterface interface {
 	// (PUT /api/app)
 	AppsPut(ctx echo.Context, params AppsPutParams) error
 
+	// (GET /api/app/{id})
+	AppsFindById(ctx echo.Context, id int32) error
+
 	// (GET /api/auth)
 	AuthAuth(ctx echo.Context, params AuthAuthParams) error
 
@@ -111,6 +120,8 @@ type ServerInterfaceWrapper struct {
 // AppsDelete converts echo context to params.
 func (w *ServerInterfaceWrapper) AppsDelete(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(BasicAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params AppsDeleteParams
@@ -151,6 +162,8 @@ func (w *ServerInterfaceWrapper) AppsList(ctx echo.Context) error {
 // AppsCreate converts echo context to params.
 func (w *ServerInterfaceWrapper) AppsCreate(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(BasicAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params AppsCreateParams
@@ -212,9 +225,27 @@ func (w *ServerInterfaceWrapper) AppsPut(ctx echo.Context) error {
 	return err
 }
 
+// AppsFindById converts echo context to params.
+func (w *ServerInterfaceWrapper) AppsFindById(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id int32
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AppsFindById(ctx, id)
+	return err
+}
+
 // AuthAuth converts echo context to params.
 func (w *ServerInterfaceWrapper) AuthAuth(ctx echo.Context) error {
 	var err error
+
+	ctx.Set(BasicAuthScopes, []string{})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params AuthAuthParams
@@ -284,6 +315,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/app", wrapper.AppsList)
 	router.POST(baseURL+"/api/app", wrapper.AppsCreate)
 	router.PUT(baseURL+"/api/app", wrapper.AppsPut)
+	router.GET(baseURL+"/api/app/:id", wrapper.AppsFindById)
 	router.GET(baseURL+"/api/auth", wrapper.AuthAuth)
 	router.POST(baseURL+"/api/auth/login", wrapper.AuthLogin)
 
@@ -359,6 +391,23 @@ func (response AppsPut200JSONResponse) VisitAppsPutResponse(w http.ResponseWrite
 	return json.NewEncoder(w).Encode(response)
 }
 
+type AppsFindByIdRequestObject struct {
+	Id int32 `json:"id"`
+}
+
+type AppsFindByIdResponseObject interface {
+	VisitAppsFindByIdResponse(w http.ResponseWriter) error
+}
+
+type AppsFindById200JSONResponse App
+
+func (response AppsFindById200JSONResponse) VisitAppsFindByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type AuthAuthRequestObject struct {
 	Params AuthAuthParams
 }
@@ -407,6 +456,9 @@ type StrictServerInterface interface {
 
 	// (PUT /api/app)
 	AppsPut(ctx context.Context, request AppsPutRequestObject) (AppsPutResponseObject, error)
+
+	// (GET /api/app/{id})
+	AppsFindById(ctx context.Context, request AppsFindByIdRequestObject) (AppsFindByIdResponseObject, error)
 
 	// (GET /api/auth)
 	AuthAuth(ctx context.Context, request AuthAuthRequestObject) (AuthAuthResponseObject, error)
@@ -543,6 +595,31 @@ func (sh *strictHandler) AppsPut(ctx echo.Context, params AppsPutParams) error {
 	return nil
 }
 
+// AppsFindById operation middleware
+func (sh *strictHandler) AppsFindById(ctx echo.Context, id int32) error {
+	var request AppsFindByIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AppsFindById(ctx.Request().Context(), request.(AppsFindByIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AppsFindById")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AppsFindByIdResponseObject); ok {
+		return validResponse.VisitAppsFindByIdResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // AuthAuth operation middleware
 func (sh *strictHandler) AuthAuth(ctx echo.Context, params AuthAuthParams) error {
 	var request AuthAuthRequestObject
@@ -595,4 +672,92 @@ func (sh *strictHandler) AuthLogin(ctx echo.Context) error {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
 	return nil
+}
+
+// Base64 encoded, gzipped, json marshaled Swagger object
+var swaggerSpec = []string{
+
+	"H4sIAAAAAAAC/+xWwW7bMAz9lYLbYQOMOmhvvrUdBhToYeh2K3JQLTZSl0iqRG3IAv37QNm1m8Ze0mUZ",
+	"imGnODJNPb73RHEFtV04a9BQgGoFoVa4EPnxzDn+cd469KQxL0oMtdeOtDX8l5YOoYJAXpsZpAKUDWTE",
+	"ognWhIswGNYuCO/Fkv9ryWF31i8EQQXa0OkJdGHaEM7Q5w81zXEgZSrA40PUHiVUN5zvMbZYw/wU4bTb",
+	"wN7eY02c/yySum7Qrxe+M8IY0HP+HUF24UNoruxMm2t82ITjRAjfrZeD7O4OoYss+oy/ADLAC9mvaLZv",
+	"1IRtpk4FBKyj17T8zNZrkp6LoGuWorMkf3PLqz3nishB4gza3NkMoTEHvMsP76GAb+hDtipMjifHEy7F",
+	"OjTCaajgNC9x5aTytqVwuhSN7SXOkTKDXK1g81xKqPhUhA/NO/7SiwUS+gDVzQo0b6RQSPRQQKMAiEjK",
+	"ev1DtP7rWSEfsWhP3BCD0yYYA51bueSI2hpCQ/wonJvrOict70NzGvtUv+XdTXsO6JWeV5AXgrMmNJud",
+	"TCYvgrodVlo/whV8UXjUMnOkRDgKsa4RJcrjNUNlTZ5Y6WbKlJKYsVos5IU15O18jh6mqYAZ0rDeVzoQ",
+	"7Flm1wvferyDCt6UfeMt265bcsvd6I4vrn+8QmfDSIkXHsXrtvRW3v5la7o4otunSP9Fe5WipaK7T8qV",
+	"lomxjXaYj9rI8+WlHNGSb6heyTw3jMu3nYDpnhTvpOofaVkdie0sMExgJJUV+SsH4VC8tYPnwewZSY1S",
+	"W855vsuDw/ANEUnlERAO0wq6OfcA/WCHfcM+jt3gtX+5erTcs6BU9G/WDJ+m6WcAAAD//+2WhJCRDQAA",
+}
+
+// GetSwagger returns the content of the embedded swagger specification file
+// or error if failed to decode
+func decodeSpec() ([]byte, error) {
+	zipped, err := base64.StdEncoding.DecodeString(strings.Join(swaggerSpec, ""))
+	if err != nil {
+		return nil, fmt.Errorf("error base64 decoding spec: %w", err)
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(zipped))
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %w", err)
+	}
+	var buf bytes.Buffer
+	_, err = buf.ReadFrom(zr)
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %w", err)
+	}
+
+	return buf.Bytes(), nil
+}
+
+var rawSpec = decodeSpecCached()
+
+// a naive cached of a decoded swagger spec
+func decodeSpecCached() func() ([]byte, error) {
+	data, err := decodeSpec()
+	return func() ([]byte, error) {
+		return data, err
+	}
+}
+
+// Constructs a synthetic filesystem for resolving external references when loading openapi specifications.
+func PathToRawSpec(pathToFile string) map[string]func() ([]byte, error) {
+	res := make(map[string]func() ([]byte, error))
+	if len(pathToFile) > 0 {
+		res[pathToFile] = rawSpec
+	}
+
+	return res
+}
+
+// GetSwagger returns the Swagger specification corresponding to the generated code
+// in this file. The external references of Swagger specification are resolved.
+// The logic of resolving external references is tightly connected to "import-mapping" feature.
+// Externally referenced files must be embedded in the corresponding golang packages.
+// Urls can be supported but this task was out of the scope.
+func GetSwagger() (swagger *openapi3.T, err error) {
+	resolvePath := PathToRawSpec("")
+
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
+	loader.ReadFromURIFunc = func(loader *openapi3.Loader, url *url.URL) ([]byte, error) {
+		pathToFile := url.String()
+		pathToFile = path.Clean(pathToFile)
+		getSpec, ok := resolvePath[pathToFile]
+		if !ok {
+			err1 := fmt.Errorf("path not found: %s", pathToFile)
+			return nil, err1
+		}
+		return getSpec()
+	}
+	var specData []byte
+	specData, err = rawSpec()
+	if err != nil {
+		return
+	}
+	swagger, err = loader.LoadFromData(specData)
+	if err != nil {
+		return
+	}
+	return
 }

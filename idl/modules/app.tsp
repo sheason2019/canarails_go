@@ -25,6 +25,9 @@ interface Apps {
   delete(@header authorization: string, id: int32): int32;
 
   @put
-  @useAuth(BasicAuth)
   put(@header authorization: string, @body app: App): int32;
+
+  @get
+  @route("{id}")
+  findById(@path id: int32): App;
 }

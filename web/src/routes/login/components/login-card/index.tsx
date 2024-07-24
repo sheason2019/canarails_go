@@ -1,4 +1,4 @@
-import { api } from '@/api/api';
+import useApi from '@/common/use-api';
 import useToken from '@/common/user/use-token';
 import useFieldProperties from '@/routes/hooks/use-field-properties';
 import { LoadingButton } from '@mui/lab';
@@ -8,6 +8,8 @@ import { useSnackbar } from 'notistack';
 import * as Yup from 'yup';
 
 export default function LoginCard() {
+  const api = useApi();
+
   const { setToken } = useToken();
   const { enqueueSnackbar } = useSnackbar();
 

@@ -29,6 +29,5 @@ func (Impl) AuthAuth(
 	return genapi.AuthAuth200JSONResponse(genapi.AuthRes{
 		Id:       int32(usr.ID),
 		Username: usr.Username,
-		ExpireAt: claim.ExpiresAt.UnixMilli(),
 	}), nil
 }

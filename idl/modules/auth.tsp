@@ -17,7 +17,6 @@ model LoginRes {
 model AuthRes {
   id: int32;
   username: string;
-  expireAt: int64;
 }
 
 @tag("AuthController")

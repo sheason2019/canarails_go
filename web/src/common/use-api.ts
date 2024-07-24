@@ -21,6 +21,13 @@ export default function useApi(props?: Props) {
         request.headers.set('Authorization', token);
       },
       async onResponse({ response }) {
+        if (response.status === 401) {
+          if (toastWhenError) {
+            enqueueSnackbar('当前用户未登录', { variant: 'error' });
+          }
+          throw new Error('当前用户未登录');
+        }
+
         if (!response.ok) {
           const errMsg = await response.text();
           if (toastWhenError) {

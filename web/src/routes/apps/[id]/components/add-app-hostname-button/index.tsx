@@ -13,11 +13,9 @@ import * as Yup from 'yup';
 import useApp from '../../hooks/use-app';
 import { useEffect } from 'react';
 import useApi from '@/common/use-api';
-import useToken from '@/common/user/use-token';
 
 export default function AddAppHostnameButton() {
   const api = useApi();
-  const { token } = useToken();
   const { data, mutate } = useApp();
   const { isOpen, onClose, onOpen } = useDialog();
   const formik = useFormik({
@@ -32,9 +30,6 @@ export default function AddAppHostnameButton() {
       if (!app) throw new Error('app not exist');
 
       await api.PUT('/api/app', {
-        params: {
-          header: { authorization: token },
-        },
         body: {
           ...app,
           hostnames: [...app.hostnames, values.hostname],

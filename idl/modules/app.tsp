@@ -16,16 +16,19 @@ model App {
 @route("/api/app")
 interface Apps {
   @post
-  create(@header authorization: string, @body app: App): int32;
+  @useAuth(BasicAuth)
+  create(@body app: App): int32;
 
   @get
   list(): App[];
 
   @delete
-  delete(@header authorization: string, id: int32): int32;
+  @useAuth(BasicAuth)
+  delete(id: int32): int32;
 
   @put
-  put(@header authorization: string, @body app: App): int32;
+  @useAuth(BasicAuth)
+  put(@body app: App): int32;
 
   @get
   @route("{id}")

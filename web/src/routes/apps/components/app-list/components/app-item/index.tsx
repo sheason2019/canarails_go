@@ -16,7 +16,6 @@ import {
 import useSWRMutation from 'swr/mutation';
 import DeleteIcon from '@mui/icons-material/Delete';
 import useDialog from '@/common/use-dialog';
-import useToken from '@/common/user/use-token';
 import useAppList from '../../hooks/use-app-list';
 import { Link } from '@modern-js/runtime/router';
 import useApi from '@/common/use-api';
@@ -27,7 +26,6 @@ interface Props {
 
 export default function AppItem({ app }: Props) {
   const api = useApi();
-  const { token } = useToken();
   const { mutate } = useAppList();
   const { isOpen, onClose, onOpen } = useDialog();
 
@@ -35,11 +33,6 @@ export default function AppItem({ app }: Props) {
     ['delete-app', app.id],
     () =>
       api.DELETE('/api/app', {
-        params: {
-          header: {
-            authorization: token,
-          },
-        },
         body: { id: app.id },
       }),
     {

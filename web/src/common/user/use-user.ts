@@ -6,10 +6,9 @@ export default function useUser() {
   const api = useApi({ toastWhenError: false });
   const { token, setToken } = useToken();
 
-  const { data, error } = useSWR(
+  const { data, error, isLoading } = useSWR(
     ['auth/user', token],
-    () =>
-      api.GET('/api/auth', { params: { header: { authorization: token } } }),
+    () => api.GET('/api/auth'),
     {
       shouldRetryOnError: false,
     },
@@ -21,7 +20,7 @@ export default function useUser() {
 
   return {
     user: data?.data,
-    isLogined: !Boolean(error) && !Boolean(data?.error),
+    isLogined: !Boolean(error) && !Boolean(data?.error) && !isLoading,
     logout,
   };
 }

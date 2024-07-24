@@ -55,26 +55,6 @@ type AppsDeleteJSONBody struct {
 	Id int32 `json:"id"`
 }
 
-// AppsDeleteParams defines parameters for AppsDelete.
-type AppsDeleteParams struct {
-	Authorization string `json:"authorization"`
-}
-
-// AppsCreateParams defines parameters for AppsCreate.
-type AppsCreateParams struct {
-	Authorization string `json:"authorization"`
-}
-
-// AppsPutParams defines parameters for AppsPut.
-type AppsPutParams struct {
-	Authorization string `json:"authorization"`
-}
-
-// AuthAuthParams defines parameters for AuthAuth.
-type AuthAuthParams struct {
-	Authorization string `json:"authorization"`
-}
-
 // AppsDeleteJSONRequestBody defines body for AppsDelete for application/json ContentType.
 type AppsDeleteJSONRequestBody AppsDeleteJSONBody
 
@@ -91,22 +71,22 @@ type AuthLoginJSONRequestBody = LoginReq
 type ServerInterface interface {
 
 	// (DELETE /api/app)
-	AppsDelete(ctx echo.Context, params AppsDeleteParams) error
+	AppsDelete(ctx echo.Context) error
 
 	// (GET /api/app)
 	AppsList(ctx echo.Context) error
 
 	// (POST /api/app)
-	AppsCreate(ctx echo.Context, params AppsCreateParams) error
+	AppsCreate(ctx echo.Context) error
 
 	// (PUT /api/app)
-	AppsPut(ctx echo.Context, params AppsPutParams) error
+	AppsPut(ctx echo.Context) error
 
 	// (GET /api/app/{id})
 	AppsFindById(ctx echo.Context, id int32) error
 
 	// (GET /api/auth)
-	AuthAuth(ctx echo.Context, params AuthAuthParams) error
+	AuthAuth(ctx echo.Context) error
 
 	// (POST /api/auth/login)
 	AuthLogin(ctx echo.Context) error
@@ -123,30 +103,8 @@ func (w *ServerInterfaceWrapper) AppsDelete(ctx echo.Context) error {
 
 	ctx.Set(BasicAuthScopes, []string{})
 
-	// Parameter object where we will unmarshal all parameters from the context
-	var params AppsDeleteParams
-
-	headers := ctx.Request().Header
-	// ------------- Required header parameter "authorization" -------------
-	if valueList, found := headers[http.CanonicalHeaderKey("authorization")]; found {
-		var Authorization string
-		n := len(valueList)
-		if n != 1 {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for authorization, got %d", n))
-		}
-
-		err = runtime.BindStyledParameterWithOptions("simple", "authorization", valueList[0], &Authorization, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter authorization: %s", err))
-		}
-
-		params.Authorization = Authorization
-	} else {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter authorization is required, but not found"))
-	}
-
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.AppsDelete(ctx, params)
+	err = w.Handler.AppsDelete(ctx)
 	return err
 }
 
@@ -165,30 +123,8 @@ func (w *ServerInterfaceWrapper) AppsCreate(ctx echo.Context) error {
 
 	ctx.Set(BasicAuthScopes, []string{})
 
-	// Parameter object where we will unmarshal all parameters from the context
-	var params AppsCreateParams
-
-	headers := ctx.Request().Header
-	// ------------- Required header parameter "authorization" -------------
-	if valueList, found := headers[http.CanonicalHeaderKey("authorization")]; found {
-		var Authorization string
-		n := len(valueList)
-		if n != 1 {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for authorization, got %d", n))
-		}
-
-		err = runtime.BindStyledParameterWithOptions("simple", "authorization", valueList[0], &Authorization, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter authorization: %s", err))
-		}
-
-		params.Authorization = Authorization
-	} else {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter authorization is required, but not found"))
-	}
-
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.AppsCreate(ctx, params)
+	err = w.Handler.AppsCreate(ctx)
 	return err
 }
 
@@ -198,30 +134,8 @@ func (w *ServerInterfaceWrapper) AppsPut(ctx echo.Context) error {
 
 	ctx.Set(BasicAuthScopes, []string{})
 
-	// Parameter object where we will unmarshal all parameters from the context
-	var params AppsPutParams
-
-	headers := ctx.Request().Header
-	// ------------- Required header parameter "authorization" -------------
-	if valueList, found := headers[http.CanonicalHeaderKey("authorization")]; found {
-		var Authorization string
-		n := len(valueList)
-		if n != 1 {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for authorization, got %d", n))
-		}
-
-		err = runtime.BindStyledParameterWithOptions("simple", "authorization", valueList[0], &Authorization, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter authorization: %s", err))
-		}
-
-		params.Authorization = Authorization
-	} else {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter authorization is required, but not found"))
-	}
-
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.AppsPut(ctx, params)
+	err = w.Handler.AppsPut(ctx)
 	return err
 }
 
@@ -247,30 +161,8 @@ func (w *ServerInterfaceWrapper) AuthAuth(ctx echo.Context) error {
 
 	ctx.Set(BasicAuthScopes, []string{})
 
-	// Parameter object where we will unmarshal all parameters from the context
-	var params AuthAuthParams
-
-	headers := ctx.Request().Header
-	// ------------- Required header parameter "authorization" -------------
-	if valueList, found := headers[http.CanonicalHeaderKey("authorization")]; found {
-		var Authorization string
-		n := len(valueList)
-		if n != 1 {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Expected one value for authorization, got %d", n))
-		}
-
-		err = runtime.BindStyledParameterWithOptions("simple", "authorization", valueList[0], &Authorization, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true})
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter authorization: %s", err))
-		}
-
-		params.Authorization = Authorization
-	} else {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Header parameter authorization is required, but not found"))
-	}
-
 	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.AuthAuth(ctx, params)
+	err = w.Handler.AuthAuth(ctx)
 	return err
 }
 
@@ -322,8 +214,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 }
 
 type AppsDeleteRequestObject struct {
-	Params AppsDeleteParams
-	Body   *AppsDeleteJSONRequestBody
+	Body *AppsDeleteJSONRequestBody
 }
 
 type AppsDeleteResponseObject interface {
@@ -356,8 +247,7 @@ func (response AppsList200JSONResponse) VisitAppsListResponse(w http.ResponseWri
 }
 
 type AppsCreateRequestObject struct {
-	Params AppsCreateParams
-	Body   *AppsCreateJSONRequestBody
+	Body *AppsCreateJSONRequestBody
 }
 
 type AppsCreateResponseObject interface {
@@ -374,8 +264,7 @@ func (response AppsCreate200JSONResponse) VisitAppsCreateResponse(w http.Respons
 }
 
 type AppsPutRequestObject struct {
-	Params AppsPutParams
-	Body   *AppsPutJSONRequestBody
+	Body *AppsPutJSONRequestBody
 }
 
 type AppsPutResponseObject interface {
@@ -409,7 +298,6 @@ func (response AppsFindById200JSONResponse) VisitAppsFindByIdResponse(w http.Res
 }
 
 type AuthAuthRequestObject struct {
-	Params AuthAuthParams
 }
 
 type AuthAuthResponseObject interface {
@@ -480,10 +368,8 @@ type strictHandler struct {
 }
 
 // AppsDelete operation middleware
-func (sh *strictHandler) AppsDelete(ctx echo.Context, params AppsDeleteParams) error {
+func (sh *strictHandler) AppsDelete(ctx echo.Context) error {
 	var request AppsDeleteRequestObject
-
-	request.Params = params
 
 	var body AppsDeleteJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
@@ -534,10 +420,8 @@ func (sh *strictHandler) AppsList(ctx echo.Context) error {
 }
 
 // AppsCreate operation middleware
-func (sh *strictHandler) AppsCreate(ctx echo.Context, params AppsCreateParams) error {
+func (sh *strictHandler) AppsCreate(ctx echo.Context) error {
 	var request AppsCreateRequestObject
-
-	request.Params = params
 
 	var body AppsCreateJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
@@ -565,10 +449,8 @@ func (sh *strictHandler) AppsCreate(ctx echo.Context, params AppsCreateParams) e
 }
 
 // AppsPut operation middleware
-func (sh *strictHandler) AppsPut(ctx echo.Context, params AppsPutParams) error {
+func (sh *strictHandler) AppsPut(ctx echo.Context) error {
 	var request AppsPutRequestObject
-
-	request.Params = params
 
 	var body AppsPutJSONRequestBody
 	if err := ctx.Bind(&body); err != nil {
@@ -621,10 +503,8 @@ func (sh *strictHandler) AppsFindById(ctx echo.Context, id int32) error {
 }
 
 // AuthAuth operation middleware
-func (sh *strictHandler) AuthAuth(ctx echo.Context, params AuthAuthParams) error {
+func (sh *strictHandler) AuthAuth(ctx echo.Context) error {
 	var request AuthAuthRequestObject
-
-	request.Params = params
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.AuthAuth(ctx.Request().Context(), request.(AuthAuthRequestObject))
@@ -677,17 +557,17 @@ func (sh *strictHandler) AuthLogin(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xWwW7bMAz9lYLbYQOMOmhvvrUdBhToYeh2K3JQLTZSl0iqRG3IAv37QNm1m8Ze0mUZ",
-	"imGnODJNPb73RHEFtV04a9BQgGoFoVa4EPnxzDn+cd469KQxL0oMtdeOtDX8l5YOoYJAXpsZpAKUDWTE",
-	"ognWhIswGNYuCO/Fkv9ryWF31i8EQQXa0OkJdGHaEM7Q5w81zXEgZSrA40PUHiVUN5zvMbZYw/wU4bTb",
-	"wN7eY02c/yySum7Qrxe+M8IY0HP+HUF24UNoruxMm2t82ITjRAjfrZeD7O4OoYss+oy/ADLAC9mvaLZv",
-	"1IRtpk4FBKyj17T8zNZrkp6LoGuWorMkf3PLqz3nishB4gza3NkMoTEHvMsP76GAb+hDtipMjifHEy7F",
-	"OjTCaajgNC9x5aTytqVwuhSN7SXOkTKDXK1g81xKqPhUhA/NO/7SiwUS+gDVzQo0b6RQSPRQQKMAiEjK",
-	"ev1DtP7rWSEfsWhP3BCD0yYYA51bueSI2hpCQ/wonJvrOict70NzGvtUv+XdTXsO6JWeV5AXgrMmNJud",
-	"TCYvgrodVlo/whV8UXjUMnOkRDgKsa4RJcrjNUNlTZ5Y6WbKlJKYsVos5IU15O18jh6mqYAZ0rDeVzoQ",
-	"7Flm1wvferyDCt6UfeMt265bcsvd6I4vrn+8QmfDSIkXHsXrtvRW3v5la7o4otunSP9Fe5WipaK7T8qV",
-	"lomxjXaYj9rI8+WlHNGSb6heyTw3jMu3nYDpnhTvpOofaVkdie0sMExgJJUV+SsH4VC8tYPnwewZSY1S",
-	"W855vsuDw/ANEUnlERAO0wq6OfcA/WCHfcM+jt3gtX+5erTcs6BU9G/WDJ+m6WcAAAD//+2WhJCRDQAA",
+	"H4sIAAAAAAAC/+xWQW/bPAz9KwW/77ABRh20N9/aDgMK9DB0uxU5qBYbq7MlVaQ3BIH++0ApdebFWdNm",
+	"uQw7xZFp6r3HR0orqF3nnUXLBNUKqG6wU+nxwnv58cF5DGwwLWqkOhjPxln5y0uPUAFxMHYBsYDGEVvV",
+	"5WDD2NFk2HpBhaCW8t9oCXtwoVMMFRjL52cwhBnLuMCQPjTc4kTKWEDAp94E1FDdSb7n2GKE+WeE82ED",
+	"d/+INUv+i56b24x+THxvhD1hkPx7ghzCp9DcuIWxt/i0Dccrou8u6El194cwRBabjL8BMqELu69oX94o",
+	"h22njgUQ1n0wvPws1stJLxWZWkoxWFK+uZfVjeYNs4coGYx9cAlCNge8Sw/voYBvGChZFWans9OZUHEe",
+	"rfIGKjhPS8Kcm7RtqbwpVba9xhY5KShslZjnWkMlXUEf8rvMEIkvnV5KZO0so2V5VN63pk6flY+UmyX3",
+	"1putte2eCTlHQRx6TAvknaW82dls9iqoL8OK4w6r4EuDJ2tlThpFJ9TXNaJGfTqqN1R3o0rfzaMQUgsS",
+	"ehfeXznLwbUtBpjHAhbI0+W4McRwIM1hVP0f8AEq+K/czMVyPRRLmYhbw+vV/Hcz9I52ULwKqA5y3Iu0",
+	"/mbn+H6HrJ96/qfpWzSNxTAsy5XRUbDt7M+PxurL5bVOozaoDhkDpf2MAJTxCwXkAysfimPRilcJMD9Q",
+	"4r2q+kcafhBxfdBNC9hzkypyTFrrS8/R3NNzs5N52crdIp2K0+Ov5yZdP47UqcMd6wjtuse+dIihtnTd",
+	"vFw9N9QvQbHYvBn5Mc7jjwAAAP//xowctA0MAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

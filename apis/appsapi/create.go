@@ -14,8 +14,8 @@ func (Impl) AppsCreate(
 	ctx context.Context,
 	request genapi.AppsCreateRequestObject,
 ) (genapi.AppsCreateResponseObject, error) {
-	usr, err := authsvc.GetUserByToken(ctx, request.Params.Authorization)
-	if err != nil {
+	usr := authsvc.GetCurrentUser(ctx)
+	if usr == nil {
 		return nil, echo.ErrUnauthorized
 	}
 
@@ -28,7 +28,7 @@ func (Impl) AppsCreate(
 		Description: request.Body.Description,
 		Hostnames:   request.Body.Hostnames,
 	}
-	err = query.App.WithContext(ctx).Create(app)
+	err := query.App.WithContext(ctx).Create(app)
 	if err != nil {
 		return nil, err
 	}

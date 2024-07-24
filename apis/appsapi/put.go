@@ -13,8 +13,8 @@ func (Impl) AppsPut(
 	ctx context.Context,
 	request genapi.AppsPutRequestObject,
 ) (genapi.AppsPutResponseObject, error) {
-	usr, err := authsvc.GetUserByToken(ctx, request.Params.Authorization)
-	if err != nil {
+	usr := authsvc.GetCurrentUser(ctx)
+	if usr == nil {
 		return nil, echo.ErrUnauthorized
 	}
 

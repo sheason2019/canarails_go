@@ -27,5 +27,6 @@ interface Auth {
   login(@body loginReq: LoginReq): LoginRes;
 
   @get
-  auth(@header authorization: string): AuthRes;
+  @useAuth(BasicAuth)
+  auth(): AuthRes;
 }

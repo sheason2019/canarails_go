@@ -14,8 +14,8 @@ func (Impl) AppsDelete(
 	ctx context.Context,
 	request genapi.AppsDeleteRequestObject,
 ) (genapi.AppsDeleteResponseObject, error) {
-	usr, err := authsvc.GetUserByToken(ctx, request.Params.Authorization)
-	if err != nil {
+	usr := authsvc.GetCurrentUser(ctx)
+	if usr == nil {
 		return nil, echo.ErrUnauthorized
 	}
 
@@ -24,7 +24,7 @@ func (Impl) AppsDelete(
 	}
 
 	// 级联删除
-	query.Q.Transaction(func(tx *query.Query) error {
+	err := query.Q.Transaction(func(tx *query.Query) error {
 		// app deploys
 		appDeploys, err := tx.AppDeploy.WithContext(ctx).
 			Join(query.AppVariant, query.AppVariant.ID.EqCol(query.AppDeploy.AppVariantID)).

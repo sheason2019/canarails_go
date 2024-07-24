@@ -9,7 +9,7 @@ import (
 	"canarails.dev/services/authsvc/tokensvc"
 )
 
-func GetUserByToken(
+func getUserByToken(
 	ctx context.Context,
 	tokenString string,
 ) (*models.User, error) {

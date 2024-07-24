@@ -25,6 +25,8 @@ func main() {
 	// 初始化 Api 服务
 	app := echo.New()
 
+	app.Use(authsvc.AuthMiddleware)
+
 	ssi := apis.New()
 	si := genapi.NewStrictHandler(ssi, nil)
 

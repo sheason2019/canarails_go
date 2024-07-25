@@ -28,7 +28,7 @@ func (Impl) AppsDelete(
 		// app deploys
 		appDeploys, err := tx.AppDeploy.WithContext(ctx).
 			Join(query.AppVariant, query.AppVariant.ID.EqCol(query.AppDeploy.AppVariantID)).
-			Where(query.AppVariant.AppID.Eq(uint(request.Body.Id))).
+			Where(query.AppVariant.AppID.Eq(uint(request.Id))).
 			Find()
 		if err != nil {
 			return fmt.Errorf("find app deploys error: %w", err)
@@ -42,7 +42,7 @@ func (Impl) AppsDelete(
 
 		// app variants
 		appVariants, err := tx.AppVariant.WithContext(ctx).
-			Where(query.AppVariant.AppID.Eq(uint(request.Body.Id))).
+			Where(query.AppVariant.AppID.Eq(uint(request.Id))).
 			Find()
 		if err != nil {
 			return fmt.Errorf("find app variants error: %w", err)
@@ -56,10 +56,10 @@ func (Impl) AppsDelete(
 
 		// app
 		_, err = tx.App.WithContext(ctx).
-			Where(query.App.ID.Eq(uint(request.Body.Id))).
+			Where(query.App.ID.Eq(uint(request.Id))).
 			Delete()
 		return err
 	})
 
-	return genapi.AppsDelete200JSONResponse(request.Body.Id), err
+	return genapi.AppsDelete200JSONResponse(request.Id), err
 }

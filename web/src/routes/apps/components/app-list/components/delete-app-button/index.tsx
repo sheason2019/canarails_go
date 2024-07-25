@@ -26,8 +26,12 @@ export default function DeleteAppButton({ app }: Props) {
   const { trigger, isMutating } = useSWRMutation(
     ['delete-app', app.id],
     () =>
-      api.DELETE('/api/app', {
-        body: { id: app.id },
+      api.DELETE('/api/app/{id}', {
+        params: {
+          path: {
+            id: app.id,
+          },
+        },
       }),
     {
       onSuccess() {

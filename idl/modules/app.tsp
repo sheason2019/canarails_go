@@ -10,6 +10,7 @@ model App {
   title: string;
   description: string;
   hostnames: string[];
+  defaultVariantId: int32;
 }
 
 @tag("AppController")
@@ -23,8 +24,9 @@ interface Apps {
   list(): App[];
 
   @delete
+  @route("{id}")
   @useAuth(BasicAuth)
-  delete(id: int32): int32;
+  delete(@path id: int32): int32;
 
   @put
   @useAuth(BasicAuth)

@@ -9,7 +9,6 @@ type AppVariant struct {
 	Description string
 	ExposePort  int
 	Matches     []AppVariantMatch `gorm:"serializer:json"`
-	IsDefault   bool
 
 	App   App
 	AppID uint

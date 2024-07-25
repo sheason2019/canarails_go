@@ -1,5 +1,3 @@
-import useAppList from './hooks/use-app-list';
-import DeleteAppButton from './components/delete-app-button';
 import {
   IconButton,
   Paper,
@@ -11,11 +9,14 @@ import {
   TableRow,
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import useAppVariants from './hooks/use-app-variants';
 import { Link } from '@modern-js/runtime/router';
+import DeleteAppVariantButton from './delete-app-variant-button';
 
-export default function AppList() {
-  const { data } = useAppList();
-  const apps = data?.data;
+export default function AppVariantsTable() {
+  const { data } = useAppVariants();
+
+  const dataSource = data?.data;
 
   return (
     <TableContainer component={Paper}>
@@ -23,28 +24,26 @@ export default function AppList() {
         <TableHead>
           <TableRow>
             <TableCell>ID</TableCell>
-            <TableCell>App 名称</TableCell>
+            <TableCell>名称</TableCell>
             <TableCell>简介</TableCell>
-            <TableCell>域名匹配</TableCell>
             <TableCell>操作</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {apps?.map(app => (
-            <TableRow key={app.id}>
+          {dataSource?.map(appVar => (
+            <TableRow key={appVar.id}>
               <TableCell component="th" scope="row">
-                {app.id}
+                {appVar.id}
               </TableCell>
-              <TableCell>{app.title}</TableCell>
-              <TableCell>{app.description}</TableCell>
-              <TableCell>{app.hostnames.join(',')}</TableCell>
+              <TableCell>{appVar.title}</TableCell>
+              <TableCell>{appVar.description}</TableCell>
               <TableCell>
-                <Link to={`/apps/${app.id}`}>
+                <Link to={`/apps/${appVar.appId}/app-variants/${appVar.id}`}>
                   <IconButton>
                     <VisibilityIcon />
                   </IconButton>
                 </Link>
-                <DeleteAppButton app={app} />
+                <DeleteAppVariantButton appVar={appVar} />
               </TableCell>
             </TableRow>
           ))}

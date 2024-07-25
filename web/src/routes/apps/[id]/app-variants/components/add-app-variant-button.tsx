@@ -1,4 +1,7 @@
+import useApi from '@/common/use-api';
 import useDialog from '@/common/use-dialog';
+import useFieldProperties from '@/routes/hooks/use-field-properties';
+import { useParams } from '@modern-js/runtime/router';
 import {
   Button,
   Dialog,
@@ -9,36 +12,40 @@ import {
   TextField,
 } from '@mui/material';
 import { useFormik } from 'formik';
+import { useSnackbar } from 'notistack';
 import { useEffect } from 'react';
-import AddIcon from '@mui/icons-material/Add';
 import * as Yup from 'yup';
-import useFieldProperties from '@/routes/hooks/use-field-properties';
-import useAppList from '../app-list/hooks/use-app-list';
-import useApi from '@/common/use-api';
+import useAppVariants from './app-variants-table/hooks/use-app-variants';
 
-export default function NewAppButton() {
+export default function AddAppVariantButton() {
+  const { id } = useParams();
   const api = useApi();
+  const { isOpen, onOpen, onClose } = useDialog();
+  const { enqueueSnackbar } = useSnackbar();
+  const { mutate } = useAppVariants();
 
-  const { mutate } = useAppList();
-  const { isOpen, onClose, onOpen } = useDialog();
   const formik = useFormik({
     initialValues: {
       title: '',
       description: '',
     },
     validationSchema: Yup.object({
-      title: Yup.string().required('App名称不能为空'),
-      description: Yup.string(),
+      title: Yup.string().required('泳道名称不能为空'),
+      Description: Yup.string(),
     }),
-    async onSubmit(values) {
-      await api.POST('/api/app', {
+    onSubmit: async values => {
+      const res = await api.POST('/api/app-variant', {
         body: {
+          id: 0,
           title: values.title,
           description: values.description,
-          id: 0,
-          hostnames: [],
-          defaultVariantId: 0,
+          appId: Number(id),
+          matches: [],
+          exposePort: 80,
         },
+      });
+      enqueueSnackbar(`创建流量泳道成功，ID：${res.data}`, {
+        variant: 'success',
       });
       mutate();
       onClose();
@@ -47,41 +54,28 @@ export default function NewAppButton() {
 
   const { getFieldProperties } = useFieldProperties(formik);
 
-  const handleClose = () => {
-    if (!formik.isSubmitting) onClose();
-  };
-
   useEffect(() => {
     formik.resetForm();
   }, [isOpen]);
 
   return (
     <>
-      <Button variant="contained" startIcon={<AddIcon />} onClick={onOpen}>
-        NEW
+      <Button variant="contained" onClick={onOpen}>
+        新增
       </Button>
-      <Dialog
-        open={isOpen}
-        onClose={handleClose}
-        fullWidth
-        maxWidth="sm"
-        aria-labelledby="退出登录"
-        aria-describedby="确认退出登录"
-      >
+      <Dialog open={isOpen} onClose={onClose} fullWidth>
         <form onSubmit={formik.handleSubmit}>
-          <DialogTitle>新建 App</DialogTitle>
+          <DialogTitle>创建流量泳道</DialogTitle>
           <DialogContent>
-            <Stack gap={2}>
+            <Stack spacing={2}>
               <TextField
-                label="App 名称"
+                label="泳道名称"
                 variant="standard"
-                fullWidth
                 {...getFieldProperties('title')}
               />
               <TextField
                 label="简介"
                 variant="standard"
-                fullWidth
                 multiline
                 minRows={3}
                 maxRows={5}
@@ -90,14 +84,8 @@ export default function NewAppButton() {
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} disabled={formik.isSubmitting}>
-              取消
-            </Button>
-            <Button
-              variant="contained"
-              type="submit"
-              disabled={formik.isSubmitting}
-            >
+            <Button onClick={onClose}>取消</Button>
+            <Button variant="contained" type="submit">
               提交
             </Button>
           </DialogActions>

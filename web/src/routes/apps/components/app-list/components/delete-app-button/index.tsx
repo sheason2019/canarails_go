@@ -1,30 +1,24 @@
 import { components } from '@/api/api-gen';
 import {
-  Box,
   Button,
-  Card,
-  CardActions,
-  CardContent,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   IconButton,
-  Typography,
 } from '@mui/material';
 import useSWRMutation from 'swr/mutation';
 import DeleteIcon from '@mui/icons-material/Delete';
 import useDialog from '@/common/use-dialog';
 import useAppList from '../../hooks/use-app-list';
-import { Link } from '@modern-js/runtime/router';
 import useApi from '@/common/use-api';
 
 interface Props {
   app: components['schemas']['App'];
 }
 
-export default function AppItem({ app }: Props) {
+export default function DeleteAppButton({ app }: Props) {
   const api = useApi();
   const { mutate } = useAppList();
   const { isOpen, onClose, onOpen } = useDialog();
@@ -49,23 +43,9 @@ export default function AppItem({ app }: Props) {
 
   return (
     <>
-      <Card>
-        <CardContent>
-          <Typography variant="h5">{app.title}</Typography>
-          {app.description.length > 0 && (
-            <Typography variant="body2">{app.description}</Typography>
-          )}
-        </CardContent>
-        <CardActions>
-          <IconButton color="error" onClick={onOpen}>
-            <DeleteIcon />
-          </IconButton>
-          <Box sx={{ flex: 1 }} />
-          <Link to={`/apps/${app.id}`}>
-            <Button variant="contained">查看详情</Button>
-          </Link>
-        </CardActions>
-      </Card>
+      <IconButton color="error" onClick={onOpen}>
+        <DeleteIcon />
+      </IconButton>
       <Dialog open={isOpen} onClose={handleClose}>
         <DialogTitle>警告</DialogTitle>
         <DialogContent>

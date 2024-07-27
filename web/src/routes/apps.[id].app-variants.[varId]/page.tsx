@@ -2,6 +2,7 @@ import { Box, Button, Stack, Typography } from '@mui/material';
 import useAppVariant from './hooks/use-app-variant';
 import Descriptions from '@/common/descriptions';
 import AddHeaderMatchButton from './components/add-header-match-button';
+import DeleteHeaderMatchButton from './components/delete-header-match-button';
 
 export default function Page() {
   const { data } = useAppVariant();
@@ -64,7 +65,12 @@ export default function Page() {
         <Descriptions
           items={
             appVar?.matches.map(match => ({
-              label: match.header,
+              label: (
+                <Stack direction="row" alignItems="center">
+                  <Box sx={{ flex: 1 }}>{match.header}</Box>
+                  <DeleteHeaderMatchButton header={match.header} />
+                </Stack>
+              ),
               value: match.value,
             })) ?? []
           }

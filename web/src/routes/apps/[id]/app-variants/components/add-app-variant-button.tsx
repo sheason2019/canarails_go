@@ -41,6 +41,8 @@ export default function AddAppVariantButton() {
           description: values.description,
           appId: Number(id),
           matches: [],
+          imageName: '',
+          replicas: 0,
           exposePort: 80,
         },
       });

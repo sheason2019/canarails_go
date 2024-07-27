@@ -33,6 +33,7 @@ func newApp(db *gorm.DB, opts ...gen.DOOption) app {
 	_app.Title = field.NewString(tableName, "title")
 	_app.Description = field.NewString(tableName, "description")
 	_app.Hostnames = field.NewField(tableName, "hostnames")
+	_app.DefaultVariantID = field.NewUint(tableName, "default_variant_id")
 	_app.AppVariants = appHasManyAppVariants{
 		db: db.Session(&gorm.Session{}),
 
@@ -60,15 +61,16 @@ func newApp(db *gorm.DB, opts ...gen.DOOption) app {
 type app struct {
 	appDo appDo
 
-	ALL         field.Asterisk
-	ID          field.Uint
-	CreatedAt   field.Time
-	UpdatedAt   field.Time
-	DeletedAt   field.Field
-	Title       field.String
-	Description field.String
-	Hostnames   field.Field
-	AppVariants appHasManyAppVariants
+	ALL              field.Asterisk
+	ID               field.Uint
+	CreatedAt        field.Time
+	UpdatedAt        field.Time
+	DeletedAt        field.Field
+	Title            field.String
+	Description      field.String
+	Hostnames        field.Field
+	DefaultVariantID field.Uint
+	AppVariants      appHasManyAppVariants
 
 	fieldMap map[string]field.Expr
 }
@@ -92,6 +94,7 @@ func (a *app) updateTableName(table string) *app {
 	a.Title = field.NewString(table, "title")
 	a.Description = field.NewString(table, "description")
 	a.Hostnames = field.NewField(table, "hostnames")
+	a.DefaultVariantID = field.NewUint(table, "default_variant_id")
 
 	a.fillFieldMap()
 
@@ -116,7 +119,7 @@ func (a *app) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *app) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 8)
+	a.fieldMap = make(map[string]field.Expr, 9)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
@@ -124,6 +127,7 @@ func (a *app) fillFieldMap() {
 	a.fieldMap["title"] = a.Title
 	a.fieldMap["description"] = a.Description
 	a.fieldMap["hostnames"] = a.Hostnames
+	a.fieldMap["default_variant_id"] = a.DefaultVariantID
 
 }
 

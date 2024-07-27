@@ -25,21 +25,6 @@ func (Impl) AppsDelete(
 
 	// 级联删除
 	err := query.Q.Transaction(func(tx *query.Query) error {
-		// app deploys
-		appDeploys, err := tx.AppDeploy.WithContext(ctx).
-			Join(query.AppVariant, query.AppVariant.ID.EqCol(query.AppDeploy.AppVariantID)).
-			Where(query.AppVariant.AppID.Eq(uint(request.Id))).
-			Find()
-		if err != nil {
-			return fmt.Errorf("find app deploys error: %w", err)
-		}
-		if len(appDeploys) > 0 {
-			_, err = tx.AppDeploy.WithContext(ctx).Delete(appDeploys...)
-			if err != nil {
-				return fmt.Errorf("delete app deploys error: %w", err)
-			}
-		}
-
 		// app variants
 		appVariants, err := tx.AppVariant.WithContext(ctx).
 			Where(query.AppVariant.AppID.Eq(uint(request.Id))).

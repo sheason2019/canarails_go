@@ -9,6 +9,8 @@ model AppVariant {
   id: int32;
   title: string;
   description: string;
+  imageName: string;
+  replicas: int32;
   exposePort: int32;
   matches: AppVariantMatch[];
   appId: int32;

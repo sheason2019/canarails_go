@@ -34,7 +34,8 @@ func newAppVariant(db *gorm.DB, opts ...gen.DOOption) appVariant {
 	_appVariant.Description = field.NewString(tableName, "description")
 	_appVariant.ExposePort = field.NewInt(tableName, "expose_port")
 	_appVariant.Matches = field.NewField(tableName, "matches")
-	_appVariant.IsDefault = field.NewBool(tableName, "is_default")
+	_appVariant.ImageName = field.NewString(tableName, "image_name")
+	_appVariant.Replicas = field.NewString(tableName, "replicas")
 	_appVariant.AppID = field.NewUint(tableName, "app_id")
 	_appVariant.App = appVariantBelongsToApp{
 		db: db.Session(&gorm.Session{}),
@@ -72,7 +73,8 @@ type appVariant struct {
 	Description field.String
 	ExposePort  field.Int
 	Matches     field.Field
-	IsDefault   field.Bool
+	ImageName   field.String
+	Replicas    field.String
 	AppID       field.Uint
 	App         appVariantBelongsToApp
 
@@ -99,7 +101,8 @@ func (a *appVariant) updateTableName(table string) *appVariant {
 	a.Description = field.NewString(table, "description")
 	a.ExposePort = field.NewInt(table, "expose_port")
 	a.Matches = field.NewField(table, "matches")
-	a.IsDefault = field.NewBool(table, "is_default")
+	a.ImageName = field.NewString(table, "image_name")
+	a.Replicas = field.NewString(table, "replicas")
 	a.AppID = field.NewUint(table, "app_id")
 
 	a.fillFieldMap()
@@ -127,7 +130,7 @@ func (a *appVariant) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *appVariant) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 11)
+	a.fieldMap = make(map[string]field.Expr, 12)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
@@ -136,7 +139,8 @@ func (a *appVariant) fillFieldMap() {
 	a.fieldMap["description"] = a.Description
 	a.fieldMap["expose_port"] = a.ExposePort
 	a.fieldMap["matches"] = a.Matches
-	a.fieldMap["is_default"] = a.IsDefault
+	a.fieldMap["image_name"] = a.ImageName
+	a.fieldMap["replicas"] = a.Replicas
 	a.fieldMap["app_id"] = a.AppID
 
 }

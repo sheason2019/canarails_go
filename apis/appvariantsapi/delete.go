@@ -2,7 +2,6 @@ package appvariantsapi
 
 import (
 	"context"
-	"fmt"
 
 	"canarails.dev/apis/genapi"
 	"canarails.dev/query"
@@ -23,19 +22,9 @@ func (Impl) AppVariantsDelete(
 		return nil, echo.ErrForbidden
 	}
 
-	err := query.Q.Transaction(func(tx *query.Query) error {
-		_, err := query.AppDeploy.WithContext(ctx).
-			Where(query.AppDeploy.AppVariantID.Eq(uint(request.Id))).
-			Delete()
-		if err != nil {
-			return fmt.Errorf("delete app deploy error: %w", err)
-		}
-
-		_, err = query.AppVariant.WithContext(ctx).
-			Where(query.AppVariant.ID.Eq(uint(request.Id))).
-			Delete()
-		return err
-	})
+	_, err := query.AppVariant.WithContext(ctx).
+		Where(query.AppVariant.ID.Eq(uint(request.Id))).
+		Delete()
 
 	return genapi.AppVariantsDelete200JSONResponse(request.Id), err
 }

@@ -18,7 +18,6 @@ import (
 var (
 	Q           = new(Query)
 	App         *app
-	AppDeploy   *appDeploy
 	AppVariant  *appVariant
 	PersistData *persistData
 	User        *user
@@ -27,7 +26,6 @@ var (
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	App = &Q.App
-	AppDeploy = &Q.AppDeploy
 	AppVariant = &Q.AppVariant
 	PersistData = &Q.PersistData
 	User = &Q.User
@@ -37,7 +35,6 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
 		db:          db,
 		App:         newApp(db, opts...),
-		AppDeploy:   newAppDeploy(db, opts...),
 		AppVariant:  newAppVariant(db, opts...),
 		PersistData: newPersistData(db, opts...),
 		User:        newUser(db, opts...),
@@ -48,7 +45,6 @@ type Query struct {
 	db *gorm.DB
 
 	App         app
-	AppDeploy   appDeploy
 	AppVariant  appVariant
 	PersistData persistData
 	User        user
@@ -60,7 +56,6 @@ func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
 		db:          db,
 		App:         q.App.clone(db),
-		AppDeploy:   q.AppDeploy.clone(db),
 		AppVariant:  q.AppVariant.clone(db),
 		PersistData: q.PersistData.clone(db),
 		User:        q.User.clone(db),
@@ -79,7 +74,6 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
 		db:          db,
 		App:         q.App.replaceDB(db),
-		AppDeploy:   q.AppDeploy.replaceDB(db),
 		AppVariant:  q.AppVariant.replaceDB(db),
 		PersistData: q.PersistData.replaceDB(db),
 		User:        q.User.replaceDB(db),
@@ -88,7 +82,6 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 
 type queryCtx struct {
 	App         IAppDo
-	AppDeploy   IAppDeployDo
 	AppVariant  IAppVariantDo
 	PersistData IPersistDataDo
 	User        IUserDo
@@ -97,7 +90,6 @@ type queryCtx struct {
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
 		App:         q.App.WithContext(ctx),
-		AppDeploy:   q.AppDeploy.WithContext(ctx),
 		AppVariant:  q.AppVariant.WithContext(ctx),
 		PersistData: q.PersistData.WithContext(ctx),
 		User:        q.User.WithContext(ctx),

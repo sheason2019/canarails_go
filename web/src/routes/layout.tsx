@@ -9,17 +9,20 @@ import '@fontsource/roboto/700.css';
 import './layout.css';
 import { RecoilRoot } from 'recoil';
 import { SnackbarProvider } from 'notistack';
+import UserProvider from '@/common/user/user-provider';
 
 export default function Layout() {
   return (
     <RecoilRoot>
       <CssBaseline />
-      <SnackbarProvider>
-        <AppHeader />
-        <Container>
-          <Outlet />
-        </Container>
-      </SnackbarProvider>
+      <UserProvider>
+        <SnackbarProvider>
+          <AppHeader />
+          <Container>
+            <Outlet />
+          </Container>
+        </SnackbarProvider>
+      </UserProvider>
     </RecoilRoot>
   );
 }

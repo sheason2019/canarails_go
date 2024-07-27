@@ -28,7 +28,9 @@ func (Impl) AppVariantsCreate(
 	appVar := &models.AppVariant{
 		Title:       body.Title,
 		Description: body.Description,
-		ExposePort:  int(body.ExposePort),
+		ExposePort:  uint(body.ExposePort),
+		ImageName:   body.ImageName,
+		Replicas:    uint(body.Replicas),
 		AppID:       uint(body.AppId),
 	}
 	err := query.AppVariant.WithContext(ctx).Create(appVar)

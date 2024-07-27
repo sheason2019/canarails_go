@@ -36,6 +36,8 @@ func (Impl) AppVariantsList(
 			Description: v.Description,
 			Matches:     matches,
 			ExposePort:  int32(v.ExposePort),
+			ImageName:   v.ImageName,
+			Replicas:    int32(v.Replicas),
 		}
 	}
 

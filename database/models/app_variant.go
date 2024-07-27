@@ -7,11 +7,11 @@ type AppVariant struct {
 
 	Title       string
 	Description string
-	ExposePort  int
+	ExposePort  uint
 	Matches     []AppVariantMatch `gorm:"serializer:json"`
 
 	ImageName string
-	Replicas  string
+	Replicas  uint
 
 	App   App
 	AppID uint

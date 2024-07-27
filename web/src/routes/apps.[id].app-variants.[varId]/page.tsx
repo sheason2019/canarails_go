@@ -1,8 +1,10 @@
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import useAppVariant from './hooks/use-app-variant';
 import Descriptions from '@/common/descriptions';
 import AddHeaderMatchButton from './components/add-header-match-button';
 import DeleteHeaderMatchButton from './components/delete-header-match-button';
+import PutInfoButton from './components/put-info-button';
+import PutConfigButton from './components/put-config-button';
 
 export default function Page() {
   const { data } = useAppVariant();
@@ -15,7 +17,7 @@ export default function Page() {
         <Typography variant="h5" sx={{ flex: 1 }}>
           基本信息
         </Typography>
-        <Button variant="contained">修改</Button>
+        <PutInfoButton />
       </Stack>
       <Descriptions
         items={[
@@ -37,7 +39,7 @@ export default function Page() {
         <Typography variant="h5" sx={{ flex: 1 }}>
           配置信息
         </Typography>
-        <Button variant="contained">修改</Button>
+        <PutConfigButton />
       </Stack>
       <Descriptions
         items={[

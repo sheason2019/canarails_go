@@ -33,6 +33,8 @@ func (Impl) AppVariantsFindById(
 		Description: record.Description,
 		ExposePort:  int32(record.ExposePort),
 		Matches:     matches,
+		ImageName:   record.ImageName,
+		Replicas:    int32(record.Replicas),
 		AppId:       int32(record.AppID),
 	}
 

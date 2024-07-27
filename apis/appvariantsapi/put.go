@@ -35,7 +35,9 @@ func (Impl) AppVariantsPut(
 
 	record.Title = body.Title
 	record.Description = body.Description
-	record.ExposePort = int(body.ExposePort)
+	record.ExposePort = uint(body.ExposePort)
+	record.ImageName = body.ImageName
+	record.Replicas = uint(body.Replicas)
 	matches := make([]models.AppVariantMatch, len(body.Matches))
 	for i, v := range body.Matches {
 		matches[i] = models.AppVariantMatch{
@@ -46,6 +48,5 @@ func (Impl) AppVariantsPut(
 	record.Matches = matches
 
 	err = query.AppVariant.WithContext(ctx).Save(record)
-
 	return genapi.AppVariantsPut200JSONResponse(request.Id), err
 }

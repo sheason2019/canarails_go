@@ -32,10 +32,10 @@ func newAppVariant(db *gorm.DB, opts ...gen.DOOption) appVariant {
 	_appVariant.DeletedAt = field.NewField(tableName, "deleted_at")
 	_appVariant.Title = field.NewString(tableName, "title")
 	_appVariant.Description = field.NewString(tableName, "description")
-	_appVariant.ExposePort = field.NewInt(tableName, "expose_port")
+	_appVariant.ExposePort = field.NewUint(tableName, "expose_port")
 	_appVariant.Matches = field.NewField(tableName, "matches")
 	_appVariant.ImageName = field.NewString(tableName, "image_name")
-	_appVariant.Replicas = field.NewString(tableName, "replicas")
+	_appVariant.Replicas = field.NewUint(tableName, "replicas")
 	_appVariant.AppID = field.NewUint(tableName, "app_id")
 	_appVariant.App = appVariantBelongsToApp{
 		db: db.Session(&gorm.Session{}),
@@ -71,10 +71,10 @@ type appVariant struct {
 	DeletedAt   field.Field
 	Title       field.String
 	Description field.String
-	ExposePort  field.Int
+	ExposePort  field.Uint
 	Matches     field.Field
 	ImageName   field.String
-	Replicas    field.String
+	Replicas    field.Uint
 	AppID       field.Uint
 	App         appVariantBelongsToApp
 
@@ -99,10 +99,10 @@ func (a *appVariant) updateTableName(table string) *appVariant {
 	a.DeletedAt = field.NewField(table, "deleted_at")
 	a.Title = field.NewString(table, "title")
 	a.Description = field.NewString(table, "description")
-	a.ExposePort = field.NewInt(table, "expose_port")
+	a.ExposePort = field.NewUint(table, "expose_port")
 	a.Matches = field.NewField(table, "matches")
 	a.ImageName = field.NewString(table, "image_name")
-	a.Replicas = field.NewString(table, "replicas")
+	a.Replicas = field.NewUint(table, "replicas")
 	a.AppID = field.NewUint(table, "app_id")
 
 	a.fillFieldMap()

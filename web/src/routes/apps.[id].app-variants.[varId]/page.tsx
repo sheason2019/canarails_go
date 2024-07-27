@@ -47,11 +47,11 @@ export default function Page() {
           },
           {
             label: '镜像名称',
-            value: '',
+            value: appVar?.imageName,
           },
           {
             label: '实例数量',
-            value: '',
+            value: appVar?.replicas,
           },
         ]}
       />

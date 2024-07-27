@@ -12,7 +12,7 @@ export default function Layout() {
   const tabValue = useMemo(() => {
     const tabName = location.pathname.split('/')[5];
     switch (tabName) {
-      case 'app-deploys':
+      case 'logs':
         return 1;
       default:
         return 0;
@@ -36,10 +36,10 @@ export default function Layout() {
             }
           />
           <Tab
-            label="部署记录"
+            label="日志信息"
             onClick={() =>
               navigate(
-                `/apps/${appVar?.appId}/app-variants/${appVar?.id}/app-deploys`,
+                `/apps/${appVar?.appId}/app-variants/${appVar?.id}/logs`,
               )
             }
           />

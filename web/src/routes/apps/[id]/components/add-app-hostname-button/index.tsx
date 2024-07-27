@@ -29,7 +29,10 @@ export default function AddAppHostnameButton() {
       const app = data?.data;
       if (!app) throw new Error('app not exist');
 
-      await api.PUT('/api/app', {
+      await api.PUT('/api/app/{id}', {
+        params: {
+          path: { id: app.id },
+        },
         body: {
           ...app,
           hostnames: [...app.hostnames, values.hostname],

@@ -11,7 +11,6 @@ model AppVariant {
   description: string;
   exposePort: int32;
   matches: AppVariantMatch[];
-
   appId: int32;
 }
 
@@ -36,8 +35,9 @@ interface AppVariants {
   delete(@path id: int32): int32;
 
   @put
+  @route("{id}")
   @useAuth(BasicAuth)
-  put(@body appVariant: AppVariant): int32;
+  put(@body appVariant: AppVariant, @path id: int32): int32;
 
   @get
   @route("{id}")

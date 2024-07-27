@@ -23,7 +23,7 @@ func (Impl) AppsPut(
 	}
 
 	record, err := query.App.WithContext(ctx).
-		Where(query.App.ID.Eq(uint(request.Body.Id))).
+		Where(query.App.ID.Eq(uint(request.Id))).
 		First()
 	if err != nil {
 		return nil, err
@@ -34,5 +34,5 @@ func (Impl) AppsPut(
 	record.Hostnames = request.Body.Hostnames
 
 	err = query.App.WithContext(ctx).Save(record)
-	return genapi.AppsPut200JSONResponse(request.Body.Id), err
+	return genapi.AppsPut200JSONResponse(request.Id), err
 }

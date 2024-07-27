@@ -27,7 +27,7 @@ func (Impl) AppVariantsPut(
 	body := request.Body
 
 	record, err := query.AppVariant.WithContext(ctx).
-		Where(query.AppVariant.ID.Eq(uint(body.Id))).
+		Where(query.AppVariant.ID.Eq(uint(request.Id))).
 		First()
 	if err != nil {
 		return nil, fmt.Errorf("find app variant by id error: %w", err)
@@ -36,15 +36,16 @@ func (Impl) AppVariantsPut(
 	record.Title = body.Title
 	record.Description = body.Description
 	record.ExposePort = int(body.ExposePort)
-	matches := make([]models.AppVariantMatch, len(record.Matches))
+	matches := make([]models.AppVariantMatch, len(body.Matches))
 	for i, v := range body.Matches {
 		matches[i] = models.AppVariantMatch{
 			Header: v.Header,
 			Value:  v.Value,
 		}
 	}
+	record.Matches = matches
 
 	err = query.AppVariant.WithContext(ctx).Save(record)
 
-	return genapi.AppVariantsPut200JSONResponse(body.Id), err
+	return genapi.AppVariantsPut200JSONResponse(request.Id), err
 }

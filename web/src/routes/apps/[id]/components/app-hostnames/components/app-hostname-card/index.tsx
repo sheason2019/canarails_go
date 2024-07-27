@@ -33,7 +33,10 @@ export default function AppHostnameCard({ hostname }: Props) {
       const app = data?.data;
       if (!app) throw new Error('cannot get app');
 
-      await api.PUT('/api/app', {
+      await api.PUT('/api/app/{id}', {
+        params: {
+          path: { id: app.id },
+        },
         body: {
           ...app,
           hostnames: app.hostnames.filter(item => item !== hostname),
@@ -62,7 +65,9 @@ export default function AppHostnameCard({ hostname }: Props) {
       <Dialog open={isOpen} onClose={onClose}>
         <DialogTitle>警告</DialogTitle>
         <DialogContent>
-          <DialogContentText>确定要删除域名匹配 {hostname} 吗？</DialogContentText>
+          <DialogContentText>
+            确定要删除域名匹配 {hostname} 吗？
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose}>取消</Button>

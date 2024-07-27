@@ -29,8 +29,9 @@ interface Apps {
   delete(@path id: int32): int32;
 
   @put
+  @route("{id}")
   @useAuth(BasicAuth)
-  put(@body app: App): int32;
+  put(@body app: App, @path id: int32): int32;
 
   @get
   @route("{id}")

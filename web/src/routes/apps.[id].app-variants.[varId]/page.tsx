@@ -1,6 +1,7 @@
 import { Box, Button, Stack, Typography } from '@mui/material';
 import useAppVariant from './hooks/use-app-variant';
 import Descriptions from '@/common/descriptions';
+import AddHeaderMatchButton from './components/add-header-match-button';
 
 export default function Page() {
   const { data } = useAppVariant();
@@ -57,7 +58,7 @@ export default function Page() {
         <Typography variant="h5" sx={{ flex: 1 }}>
           标头匹配
         </Typography>
-        <Button variant="contained">新增</Button>
+        <AddHeaderMatchButton />
       </Stack>
       {!!appVar?.matches.length ? (
         <Descriptions

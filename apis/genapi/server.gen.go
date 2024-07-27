@@ -75,14 +75,14 @@ type AppVariantsListParams struct {
 // AppsCreateJSONRequestBody defines body for AppsCreate for application/json ContentType.
 type AppsCreateJSONRequestBody = App
 
-// AppsPutJSONRequestBody defines body for AppsPut for application/json ContentType.
-type AppsPutJSONRequestBody = App
-
 // AppVariantsCreateJSONRequestBody defines body for AppVariantsCreate for application/json ContentType.
 type AppVariantsCreateJSONRequestBody = AppVariant
 
 // AppVariantsPutJSONRequestBody defines body for AppVariantsPut for application/json ContentType.
 type AppVariantsPutJSONRequestBody = AppVariant
+
+// AppsPutJSONRequestBody defines body for AppsPut for application/json ContentType.
+type AppsPutJSONRequestBody = App
 
 // AuthLoginJSONRequestBody defines body for AuthLogin for application/json ContentType.
 type AuthLoginJSONRequestBody = LoginReq
@@ -96,17 +96,11 @@ type ServerInterface interface {
 	// (POST /api/app)
 	AppsCreate(ctx echo.Context) error
 
-	// (PUT /api/app)
-	AppsPut(ctx echo.Context) error
-
 	// (GET /api/app-variant)
 	AppVariantsList(ctx echo.Context, params AppVariantsListParams) error
 
 	// (POST /api/app-variant)
 	AppVariantsCreate(ctx echo.Context) error
-
-	// (PUT /api/app-variant)
-	AppVariantsPut(ctx echo.Context) error
 
 	// (DELETE /api/app-variant/{id})
 	AppVariantsDelete(ctx echo.Context, id int32) error
@@ -114,11 +108,17 @@ type ServerInterface interface {
 	// (GET /api/app-variant/{id})
 	AppVariantsFindById(ctx echo.Context, id int32) error
 
+	// (PUT /api/app-variant/{id})
+	AppVariantsPut(ctx echo.Context, id int32) error
+
 	// (DELETE /api/app/{id})
 	AppsDelete(ctx echo.Context, id int32) error
 
 	// (GET /api/app/{id})
 	AppsFindById(ctx echo.Context, id int32) error
+
+	// (PUT /api/app/{id})
+	AppsPut(ctx echo.Context, id int32) error
 
 	// (GET /api/auth)
 	AuthAuth(ctx echo.Context) error
@@ -152,17 +152,6 @@ func (w *ServerInterfaceWrapper) AppsCreate(ctx echo.Context) error {
 	return err
 }
 
-// AppsPut converts echo context to params.
-func (w *ServerInterfaceWrapper) AppsPut(ctx echo.Context) error {
-	var err error
-
-	ctx.Set(BasicAuthScopes, []string{})
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.AppsPut(ctx)
-	return err
-}
-
 // AppVariantsList converts echo context to params.
 func (w *ServerInterfaceWrapper) AppVariantsList(ctx echo.Context) error {
 	var err error
@@ -189,17 +178,6 @@ func (w *ServerInterfaceWrapper) AppVariantsCreate(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.AppVariantsCreate(ctx)
-	return err
-}
-
-// AppVariantsPut converts echo context to params.
-func (w *ServerInterfaceWrapper) AppVariantsPut(ctx echo.Context) error {
-	var err error
-
-	ctx.Set(BasicAuthScopes, []string{})
-
-	// Invoke the callback with all the unmarshaled arguments
-	err = w.Handler.AppVariantsPut(ctx)
 	return err
 }
 
@@ -237,6 +215,24 @@ func (w *ServerInterfaceWrapper) AppVariantsFindById(ctx echo.Context) error {
 	return err
 }
 
+// AppVariantsPut converts echo context to params.
+func (w *ServerInterfaceWrapper) AppVariantsPut(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id int32
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	ctx.Set(BasicAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AppVariantsPut(ctx, id)
+	return err
+}
+
 // AppsDelete converts echo context to params.
 func (w *ServerInterfaceWrapper) AppsDelete(ctx echo.Context) error {
 	var err error
@@ -268,6 +264,24 @@ func (w *ServerInterfaceWrapper) AppsFindById(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.AppsFindById(ctx, id)
+	return err
+}
+
+// AppsPut converts echo context to params.
+func (w *ServerInterfaceWrapper) AppsPut(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id int32
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	ctx.Set(BasicAuthScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AppsPut(ctx, id)
 	return err
 }
 
@@ -321,14 +335,14 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/api/app", wrapper.AppsList)
 	router.POST(baseURL+"/api/app", wrapper.AppsCreate)
-	router.PUT(baseURL+"/api/app", wrapper.AppsPut)
 	router.GET(baseURL+"/api/app-variant", wrapper.AppVariantsList)
 	router.POST(baseURL+"/api/app-variant", wrapper.AppVariantsCreate)
-	router.PUT(baseURL+"/api/app-variant", wrapper.AppVariantsPut)
 	router.DELETE(baseURL+"/api/app-variant/:id", wrapper.AppVariantsDelete)
 	router.GET(baseURL+"/api/app-variant/:id", wrapper.AppVariantsFindById)
+	router.PUT(baseURL+"/api/app-variant/:id", wrapper.AppVariantsPut)
 	router.DELETE(baseURL+"/api/app/:id", wrapper.AppsDelete)
 	router.GET(baseURL+"/api/app/:id", wrapper.AppsFindById)
+	router.PUT(baseURL+"/api/app/:id", wrapper.AppsPut)
 	router.GET(baseURL+"/api/auth", wrapper.AuthAuth)
 	router.POST(baseURL+"/api/auth/login", wrapper.AuthLogin)
 
@@ -361,23 +375,6 @@ type AppsCreateResponseObject interface {
 type AppsCreate200JSONResponse int32
 
 func (response AppsCreate200JSONResponse) VisitAppsCreateResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type AppsPutRequestObject struct {
-	Body *AppsPutJSONRequestBody
-}
-
-type AppsPutResponseObject interface {
-	VisitAppsPutResponse(w http.ResponseWriter) error
-}
-
-type AppsPut200JSONResponse int32
-
-func (response AppsPut200JSONResponse) VisitAppsPutResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
@@ -418,23 +415,6 @@ func (response AppVariantsCreate200JSONResponse) VisitAppVariantsCreateResponse(
 	return json.NewEncoder(w).Encode(response)
 }
 
-type AppVariantsPutRequestObject struct {
-	Body *AppVariantsPutJSONRequestBody
-}
-
-type AppVariantsPutResponseObject interface {
-	VisitAppVariantsPutResponse(w http.ResponseWriter) error
-}
-
-type AppVariantsPut200JSONResponse int32
-
-func (response AppVariantsPut200JSONResponse) VisitAppVariantsPutResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type AppVariantsDeleteRequestObject struct {
 	Id int32 `json:"id"`
 }
@@ -469,6 +449,24 @@ func (response AppVariantsFindById200JSONResponse) VisitAppVariantsFindByIdRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
+type AppVariantsPutRequestObject struct {
+	Id   int32 `json:"id"`
+	Body *AppVariantsPutJSONRequestBody
+}
+
+type AppVariantsPutResponseObject interface {
+	VisitAppVariantsPutResponse(w http.ResponseWriter) error
+}
+
+type AppVariantsPut200JSONResponse int32
+
+func (response AppVariantsPut200JSONResponse) VisitAppVariantsPutResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type AppsDeleteRequestObject struct {
 	Id int32 `json:"id"`
 }
@@ -497,6 +495,24 @@ type AppsFindByIdResponseObject interface {
 type AppsFindById200JSONResponse App
 
 func (response AppsFindById200JSONResponse) VisitAppsFindByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AppsPutRequestObject struct {
+	Id   int32 `json:"id"`
+	Body *AppsPutJSONRequestBody
+}
+
+type AppsPutResponseObject interface {
+	VisitAppsPutResponse(w http.ResponseWriter) error
+}
+
+type AppsPut200JSONResponse int32
+
+func (response AppsPut200JSONResponse) VisitAppsPutResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
@@ -545,17 +561,11 @@ type StrictServerInterface interface {
 	// (POST /api/app)
 	AppsCreate(ctx context.Context, request AppsCreateRequestObject) (AppsCreateResponseObject, error)
 
-	// (PUT /api/app)
-	AppsPut(ctx context.Context, request AppsPutRequestObject) (AppsPutResponseObject, error)
-
 	// (GET /api/app-variant)
 	AppVariantsList(ctx context.Context, request AppVariantsListRequestObject) (AppVariantsListResponseObject, error)
 
 	// (POST /api/app-variant)
 	AppVariantsCreate(ctx context.Context, request AppVariantsCreateRequestObject) (AppVariantsCreateResponseObject, error)
-
-	// (PUT /api/app-variant)
-	AppVariantsPut(ctx context.Context, request AppVariantsPutRequestObject) (AppVariantsPutResponseObject, error)
 
 	// (DELETE /api/app-variant/{id})
 	AppVariantsDelete(ctx context.Context, request AppVariantsDeleteRequestObject) (AppVariantsDeleteResponseObject, error)
@@ -563,11 +573,17 @@ type StrictServerInterface interface {
 	// (GET /api/app-variant/{id})
 	AppVariantsFindById(ctx context.Context, request AppVariantsFindByIdRequestObject) (AppVariantsFindByIdResponseObject, error)
 
+	// (PUT /api/app-variant/{id})
+	AppVariantsPut(ctx context.Context, request AppVariantsPutRequestObject) (AppVariantsPutResponseObject, error)
+
 	// (DELETE /api/app/{id})
 	AppsDelete(ctx context.Context, request AppsDeleteRequestObject) (AppsDeleteResponseObject, error)
 
 	// (GET /api/app/{id})
 	AppsFindById(ctx context.Context, request AppsFindByIdRequestObject) (AppsFindByIdResponseObject, error)
+
+	// (PUT /api/app/{id})
+	AppsPut(ctx context.Context, request AppsPutRequestObject) (AppsPutResponseObject, error)
 
 	// (GET /api/auth)
 	AuthAuth(ctx context.Context, request AuthAuthRequestObject) (AuthAuthResponseObject, error)
@@ -640,35 +656,6 @@ func (sh *strictHandler) AppsCreate(ctx echo.Context) error {
 	return nil
 }
 
-// AppsPut operation middleware
-func (sh *strictHandler) AppsPut(ctx echo.Context) error {
-	var request AppsPutRequestObject
-
-	var body AppsPutJSONRequestBody
-	if err := ctx.Bind(&body); err != nil {
-		return err
-	}
-	request.Body = &body
-
-	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.AppsPut(ctx.Request().Context(), request.(AppsPutRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "AppsPut")
-	}
-
-	response, err := handler(ctx, request)
-
-	if err != nil {
-		return err
-	} else if validResponse, ok := response.(AppsPutResponseObject); ok {
-		return validResponse.VisitAppsPutResponse(ctx.Response())
-	} else if response != nil {
-		return fmt.Errorf("unexpected response type: %T", response)
-	}
-	return nil
-}
-
 // AppVariantsList operation middleware
 func (sh *strictHandler) AppVariantsList(ctx echo.Context, params AppVariantsListParams) error {
 	var request AppVariantsListRequestObject
@@ -717,35 +704,6 @@ func (sh *strictHandler) AppVariantsCreate(ctx echo.Context) error {
 		return err
 	} else if validResponse, ok := response.(AppVariantsCreateResponseObject); ok {
 		return validResponse.VisitAppVariantsCreateResponse(ctx.Response())
-	} else if response != nil {
-		return fmt.Errorf("unexpected response type: %T", response)
-	}
-	return nil
-}
-
-// AppVariantsPut operation middleware
-func (sh *strictHandler) AppVariantsPut(ctx echo.Context) error {
-	var request AppVariantsPutRequestObject
-
-	var body AppVariantsPutJSONRequestBody
-	if err := ctx.Bind(&body); err != nil {
-		return err
-	}
-	request.Body = &body
-
-	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.AppVariantsPut(ctx.Request().Context(), request.(AppVariantsPutRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "AppVariantsPut")
-	}
-
-	response, err := handler(ctx, request)
-
-	if err != nil {
-		return err
-	} else if validResponse, ok := response.(AppVariantsPutResponseObject); ok {
-		return validResponse.VisitAppVariantsPutResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -802,6 +760,37 @@ func (sh *strictHandler) AppVariantsFindById(ctx echo.Context, id int32) error {
 	return nil
 }
 
+// AppVariantsPut operation middleware
+func (sh *strictHandler) AppVariantsPut(ctx echo.Context, id int32) error {
+	var request AppVariantsPutRequestObject
+
+	request.Id = id
+
+	var body AppVariantsPutJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AppVariantsPut(ctx.Request().Context(), request.(AppVariantsPutRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AppVariantsPut")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AppVariantsPutResponseObject); ok {
+		return validResponse.VisitAppVariantsPutResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // AppsDelete operation middleware
 func (sh *strictHandler) AppsDelete(ctx echo.Context, id int32) error {
 	var request AppsDeleteRequestObject
@@ -846,6 +835,37 @@ func (sh *strictHandler) AppsFindById(ctx echo.Context, id int32) error {
 		return err
 	} else if validResponse, ok := response.(AppsFindByIdResponseObject); ok {
 		return validResponse.VisitAppsFindByIdResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// AppsPut operation middleware
+func (sh *strictHandler) AppsPut(ctx echo.Context, id int32) error {
+	var request AppsPutRequestObject
+
+	request.Id = id
+
+	var body AppsPutJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AppsPut(ctx.Request().Context(), request.(AppsPutRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AppsPut")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AppsPutResponseObject); ok {
+		return validResponse.VisitAppsPutResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -907,20 +927,20 @@ func (sh *strictHandler) AuthLogin(ctx echo.Context) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xYy27bOhD9lYD3LlpAjYxk512SokCBFAjSopvAC0YaW0wlkiGHaQ1D/14MqUdsybac",
-	"2H2kWdmmRvM4c+aQ9IIlqtBKgkTLxgtmkwwK7r+eaU0f2igNBgX4xRSm3OX4lRvBJX5MaW2qTMGRjZmQ",
-	"eHrCIoZzDeEnzMCwMmIp2MQIjUJJeqMysGiEnNHzTFmUvAgxBEJhe82qBW4Mn9NvMTQ+Csyhx2UZMQP3",
-	"ThhI2fiG/NW2yzk/zjDqgjBpYqrbO0iQQp5pXRl0UeRa7w06+KGVhStlcKDDwaAVHJNspSX/G5iyMfsv",
-	"bmkTV5yJ24o/0Zt9DXt+Hx6V22YYVYhu7kPIqtOMDHgKphfbB567AelWHmr73iwcZtch3nL0wd1wFgwR",
-	"cCB6jXlfNpdqJuQ13HfT0dza78qkvXAMT6GxjFqPGxLpwQXVN5DbAwWzrusyYhYSZwTOPxM9g9NzbkVC",
-	"rWikjt65pdUW8wxRs5I8CDlVPoXAWvbGf3lLjQZj/UCy0fHoeESlKA2Sa8HG7NQvUeWY+bAx1yLmQU5n",
-	"4OeUSuVEadIB4qi9FJYobcBqJW3I92Q0oo9ESYSgI1zrXCT+zfjOBkkI87fLmHZHs1xVGvYlgyNCGiwe",
-	"ZdweWZckACmkxx5d5DNLDTjT+kJJNCrPwbBJGTGt7JoSLwxwBBY6CBbPVTrfqb6tZS3TA42D8pmQbp3M",
-	"nZGrecnGN0uMvJmUk424ujWwXjl8xfQpmJZRM5rvHtq9et2IVttIPamaG14AgrE+qqA07x2YOYtYUMlq",
-	"V1qFL9oJiskv0oT6sLJXaaicDlWIGuFDC0VT64vi9hqw3WasD6oe/w7QPVoSL0RahktTDggbu/A+mPSr",
-	"Ch0kWlERv1tR/jiKbxPsD0Km53OvxH8BvLuM1D51+RGDhzD3lbJPOsWtPf+/KJLu8ULR0LK6tvUD6DDz",
-	"+B+yrOoKfzCuOMzWVh7ndFP21+T+w5PDzF+mD7SXN/8YHGAnHxDXPodQHVzbh4t6oFaMyqh9ssTH5Qdd",
-	"GS0n5c8AAAD//yYrWj1TFQAA",
+	"H4sIAAAAAAAC/+xYy27bOhD9lYD3LlpAjYxk512SokCBFAjSopvAC0YaW0wlkiGHaQ1D/14MqUdsybbc",
+	"2GmbZmWLGs7jzJkjSguWqEIrCRItGy+YTTIouP97pjX9aKM0GBTgF1OYcpfjV24El/gxpbWpMgVHNmZC",
+	"4ukJixjONYRLmIFhZcRSsIkRGoWStKMysGiEnNH9TFmUvAgxBEJhe82qBW4Mn9O1GBofBebQ47KMmIF7",
+	"JwykbHxD/mrb5ZwfZxh1QZg0MdXtHSRIIc+0rgy6KHKt9wYd/NDKwpUyONDhYNAKjkm20pL/DUzZmP0X",
+	"t7SJK87EbcWfaGdfw57eh0flthlGFaKb+xCy6jQjA56C6cX2geduQLqVh9q+NwuH2XWItxx9cDecBUME",
+	"HIheY96XzaWaCXkN9910NLf2uzJpLxzDU2gso9bjhkR6cEH1DeT2QMGs67qMmIXEGYHzz0TP4PScW5FQ",
+	"Kxqpoz23tNpiniFqVpIHIafKpxBYy974P2+p0WCsH0g2Oh4dj6gUpUFyLdiYnfolqhwzHzbmWsQ8yOkM",
+	"/JxSqZwoTTpAHLWXwhKlDVitpA35noxG9JMoiRB0hGudi8TvjO9skIQwf7uMaXc0y1WlYV8yOCKkweJR",
+	"xu2RdUkCkEJ67NFFPrPUgDOtL5REo/IcDJuUEdPKrinxwgBHYKGDYPFcpfOd6tta1jI90Dgonwjp1snc",
+	"Gbmal2x8s8TIm0k5WY9rGTU0evfQPlfW0amSvJpVmhteAIKxPqqgNO8dmDmLWJjoSkFX4Yt2gmLyTPyt",
+	"H6x7pXHldCiba4QPTeqm1hfF7T6weygeL0RahnNnDggbG/E+mPSTnbS45br43UT/w5CPturIByHT87kX",
+	"iL8A3l1Gas9y4TbjeOXwGSF8FaR9CdIQIXpVoF8416yXnpelOfs9Yq9RmZcgL//EIb56Be2nvsPMOzsk",
+	"IavPEQcr3GG2tvI4p7d+/8rff7h2mPkPAwc6VDdfPw7AtAFx7VOkoINre3NRD/eKURm1d5b4uHyj+wAs",
+	"J+XPAAAA///4eKdIHxYAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -11,6 +11,7 @@ import (
 	"canarails.dev/query"
 	"canarails.dev/services/authsvc"
 	"canarails.dev/services/envsvc"
+	"canarails.dev/services/gatewaysvc"
 	"github.com/labstack/echo/v4"
 )
 
@@ -21,6 +22,8 @@ func main() {
 	query.SetDefault(database.GetDb())
 	// 初始化 admin 用户密码
 	authsvc.SetupAdminPassword(context.Background(), os.Getenv(envsvc.ADMIN_PASSWORD))
+	// 同步 Gateway
+	gatewaysvc.Reconciliation(context.Background())
 
 	// 初始化 Api 服务
 	app := echo.New()

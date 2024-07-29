@@ -7,6 +7,7 @@ import (
 	"canarails.dev/database/models"
 	"canarails.dev/query"
 	"canarails.dev/services/authsvc"
+	"canarails.dev/services/gatewaysvc"
 	"github.com/labstack/echo/v4"
 )
 
@@ -29,6 +30,11 @@ func (Impl) AppsCreate(
 		Hostnames:   request.Body.Hostnames,
 	}
 	err := query.App.WithContext(ctx).Create(app)
+	if err != nil {
+		return nil, err
+	}
+
+	err = gatewaysvc.Reconciliation(ctx)
 	if err != nil {
 		return nil, err
 	}

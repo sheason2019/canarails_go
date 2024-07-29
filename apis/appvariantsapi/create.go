@@ -7,6 +7,7 @@ import (
 	"canarails.dev/database/models"
 	"canarails.dev/query"
 	"canarails.dev/services/authsvc"
+	"canarails.dev/services/gatewaysvc"
 	"github.com/labstack/echo/v4"
 )
 
@@ -33,7 +34,16 @@ func (Impl) AppVariantsCreate(
 		Replicas:    uint(body.Replicas),
 		AppID:       uint(body.AppId),
 	}
-	err := query.AppVariant.WithContext(ctx).Create(appVar)
 
-	return genapi.AppVariantsCreate200JSONResponse(appVar.ID), err
+	err := query.AppVariant.WithContext(ctx).Create(appVar)
+	if err != nil {
+		return nil, err
+	}
+
+	err = gatewaysvc.Reconciliation(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return genapi.AppVariantsCreate200JSONResponse(appVar.ID), nil
 }

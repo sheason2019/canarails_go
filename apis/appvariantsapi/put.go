@@ -8,6 +8,7 @@ import (
 	"canarails.dev/database/models"
 	"canarails.dev/query"
 	"canarails.dev/services/authsvc"
+	"canarails.dev/services/gatewaysvc"
 	"github.com/labstack/echo/v4"
 )
 
@@ -48,5 +49,14 @@ func (Impl) AppVariantsPut(
 	record.Matches = matches
 
 	err = query.AppVariant.WithContext(ctx).Save(record)
-	return genapi.AppVariantsPut200JSONResponse(request.Id), err
+	if err != nil {
+		return nil, err
+	}
+
+	err = gatewaysvc.Reconciliation(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return genapi.AppVariantsPut200JSONResponse(request.Id), nil
 }

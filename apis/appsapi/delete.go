@@ -7,6 +7,7 @@ import (
 	"canarails.dev/apis/genapi"
 	"canarails.dev/query"
 	"canarails.dev/services/authsvc"
+	"canarails.dev/services/gatewaysvc"
 	"github.com/labstack/echo/v4"
 )
 
@@ -45,6 +46,11 @@ func (Impl) AppsDelete(
 			Delete()
 		return err
 	})
+
+	err = gatewaysvc.Reconciliation(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	return genapi.AppsDelete200JSONResponse(request.Id), err
 }

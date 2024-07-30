@@ -2,9 +2,10 @@ import { Box, Stack, Typography } from '@mui/material';
 import useAppVariant from './hooks/use-app-variant';
 import Descriptions from '@/common/descriptions';
 import AddHeaderMatchButton from './components/add-header-match-button';
-import DeleteHeaderMatchButton from './components/delete-header-match-button';
 import PutInfoButton from './components/put-info-button';
 import PutConfigButton from './components/put-config-button';
+import HeaderMatches from './components/header-matches';
+import HeaderMatchAlert from './components/header-matches/header-match-alert';
 
 export default function Page() {
   const { data } = useAppVariant();
@@ -63,34 +64,8 @@ export default function Page() {
         </Typography>
         <AddHeaderMatchButton />
       </Stack>
-      {!!appVar?.matches.length ? (
-        <Descriptions
-          items={
-            appVar?.matches.map(match => ({
-              label: (
-                <Stack direction="row" alignItems="center">
-                  <Box sx={{ flex: 1 }}>{match.header}</Box>
-                  <DeleteHeaderMatchButton header={match.header} />
-                </Stack>
-              ),
-              value: match.value,
-            })) ?? []
-          }
-        />
-      ) : (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: 48,
-          }}
-        >
-          <Typography variant="body2" color="GrayText">
-            暂无数据
-          </Typography>
-        </Box>
-      )}
+      <HeaderMatchAlert />
+      <HeaderMatches />
     </main>
   );
 }

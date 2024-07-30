@@ -1,7 +1,7 @@
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import useApp from '../../hooks/use-app';
 import AppHostnameCard from './components/app-hostname-card';
-import { Box, Typography } from '@mui/material';
+import { Alert } from '@mui/material';
 
 export default function AppHostnames() {
   const { data } = useApp();
@@ -9,18 +9,9 @@ export default function AppHostnames() {
 
   if (!app?.hostnames.length) {
     return (
-      <Box
-        sx={{
-          height: 48,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Typography variant="body2" color="gray">
-          暂无数据
-        </Typography>
-      </Box>
+      <Alert severity="warning">
+        请至少配置一个域名匹配，否则 App 将不会应用到 Kubernetes 集群
+      </Alert>
     );
   }
 

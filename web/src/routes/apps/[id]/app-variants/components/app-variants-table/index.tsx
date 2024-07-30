@@ -10,8 +10,8 @@ import {
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import useAppVariants from './hooks/use-app-variants';
-import { Link } from '@modern-js/runtime/router';
 import DeleteAppVariantButton from './delete-app-variant-button';
+import StyledLink from '@/common/styled-link';
 
 export default function AppVariantsTable() {
   const { data } = useAppVariants();
@@ -38,11 +38,11 @@ export default function AppVariantsTable() {
               <TableCell>{appVar.title}</TableCell>
               <TableCell>{appVar.description}</TableCell>
               <TableCell>
-                <Link to={`/apps/${appVar.appId}/app-variants/${appVar.id}`}>
+                <StyledLink to={`/apps/${appVar.appId}/app-variants/${appVar.id}`}>
                   <IconButton>
                     <VisibilityIcon />
                   </IconButton>
-                </Link>
+                </StyledLink>
                 <DeleteAppVariantButton appVar={appVar} />
               </TableCell>
             </TableRow>

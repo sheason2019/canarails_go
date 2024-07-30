@@ -12,7 +12,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import useSWRMutation from 'swr/mutation';
 import useApi from '@/common/use-api';
 import { useSnackbar } from 'notistack';
-import useAppVariant from '../hooks/use-app-variant';
+import useAppVariant from '../../hooks/use-app-variant';
 
 interface Props {
   header: string;

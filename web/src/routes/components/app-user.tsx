@@ -1,6 +1,6 @@
+import StyledLink from '@/common/styled-link';
 import useUser from '@/common/user/use-user';
-import { Link } from '@modern-js/runtime/router';
-import { Avatar, Box, Button } from '@mui/material';
+import { Avatar, Button } from '@mui/material';
 
 export default function AppUser() {
   const { isLogined } = useUser();
@@ -8,20 +8,14 @@ export default function AppUser() {
   if (!isLogined) {
     return (
       <Button color="inherit">
-        <Box
-          component={Link}
-          to="/login"
-          sx={{ color: 'inherit', textDecoration: 'none' }}
-        >
-          登录
-        </Box>
+        <StyledLink to="/login">登录</StyledLink>
       </Button>
     );
   }
 
   return (
-    <Link to="/login">
+    <StyledLink to="/login">
       <Avatar />
-    </Link>
+    </StyledLink>
   );
 }

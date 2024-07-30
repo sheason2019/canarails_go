@@ -1,8 +1,9 @@
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import useApp from './hooks/use-app';
 import Descriptions from '@/common/descriptions';
 import AddAppHostnameButton from './components/add-app-hostname-button';
 import AppHostnames from './components/app-hostnames';
+import PutAppInfoButton from './components/put-app-info-button';
 
 export default function AppPage() {
   const { data } = useApp();
@@ -17,9 +18,7 @@ export default function AppPage() {
         sx={{ my: 2 }}
       >
         <Typography variant="h5">基本信息</Typography>
-        <Button variant="contained" color="primary">
-          修改
-        </Button>
+        <PutAppInfoButton />
       </Stack>
       <Descriptions
         items={[

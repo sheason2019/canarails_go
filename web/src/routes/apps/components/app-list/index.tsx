@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Link } from '@modern-js/runtime/router';
+import StyledLink from '@/common/styled-link';
 
 export default function AppList() {
   const { data } = useAppList();
@@ -39,11 +39,11 @@ export default function AppList() {
               <TableCell>{app.description}</TableCell>
               <TableCell>{app.hostnames.join(',')}</TableCell>
               <TableCell>
-                <Link to={`/apps/${app.id}`}>
+                <StyledLink to={`/apps/${app.id}`}>
                   <IconButton>
                     <VisibilityIcon />
                   </IconButton>
-                </Link>
+                </StyledLink>
                 <DeleteAppButton app={app} />
               </TableCell>
             </TableRow>

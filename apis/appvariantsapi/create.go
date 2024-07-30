@@ -35,12 +35,19 @@ func (Impl) AppVariantsCreate(
 		AppID:       uint(body.AppId),
 	}
 
-	err := query.AppVariant.WithContext(ctx).Create(appVar)
-	if err != nil {
-		return nil, err
-	}
+	err := query.Q.Transaction(func(tx *query.Query) error {
+		err := query.AppVariant.WithContext(ctx).Create(appVar)
+		if err != nil {
+			return err
+		}
 
-	err = gatewaysvc.Reconciliation(ctx)
+		err = gatewaysvc.Reconciliation(ctx)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}

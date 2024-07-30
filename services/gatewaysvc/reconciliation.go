@@ -10,6 +10,9 @@ import (
 // 全量同步
 func Reconciliation(ctx context.Context) error {
 	apps, err := query.App.WithContext(ctx).
+		Join(query.AppVariant, query.AppVariant.AppID.EqCol(query.App.ID)).
+		Where(query.AppVariant.Replicas.Gt(0)).
+		Where(query.AppVariant.ImageName.NotLike("")).
 		Preload(query.App.AppVariants).
 		Find()
 	if err != nil {

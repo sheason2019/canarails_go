@@ -23,14 +23,21 @@ func (Impl) AppVariantsDelete(
 		return nil, echo.ErrForbidden
 	}
 
-	_, err := query.AppVariant.WithContext(ctx).
-		Where(query.AppVariant.ID.Eq(uint(request.Id))).
-		Delete()
-	if err != nil {
-		return nil, err
-	}
+	err := query.Q.Transaction(func(tx *query.Query) error {
+		_, err := query.AppVariant.WithContext(ctx).
+			Where(query.AppVariant.ID.Eq(uint(request.Id))).
+			Delete()
+		if err != nil {
+			return err
+		}
 
-	err = gatewaysvc.Reconciliation(ctx)
+		err = gatewaysvc.Reconciliation(ctx)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}

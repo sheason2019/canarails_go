@@ -62,7 +62,13 @@ export default function PutConfigButton() {
   const { getFieldProperties } = useFieldProperties(formik);
 
   useEffect(() => {
-    formik.resetForm();
+    formik.resetForm({
+      values: {
+        exposePort: appVar?.exposePort ?? 0,
+        imageName: appVar?.imageName ?? '',
+        replicas: appVar?.replicas ?? 0,
+      },
+    });
   }, [isOpen]);
 
   return (

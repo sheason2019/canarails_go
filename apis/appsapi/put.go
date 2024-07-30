@@ -23,24 +23,31 @@ func (Impl) AppsPut(
 		return nil, echo.ErrForbidden
 	}
 
-	record, err := query.App.WithContext(ctx).
-		Where(query.App.ID.Eq(uint(request.Id))).
-		First()
-	if err != nil {
-		return nil, err
-	}
+	err := query.Q.Transaction(func(tx *query.Query) error {
+		record, err := query.App.WithContext(ctx).
+			Where(query.App.ID.Eq(uint(request.Id))).
+			First()
+		if err != nil {
+			return err
+		}
 
-	record.Title = request.Body.Title
-	record.Description = request.Body.Description
-	record.Hostnames = request.Body.Hostnames
-	record.DefaultVariantID = uint(request.Body.DefaultVariantId)
+		record.Title = request.Body.Title
+		record.Description = request.Body.Description
+		record.Hostnames = request.Body.Hostnames
+		record.DefaultVariantID = uint(request.Body.DefaultVariantId)
 
-	err = query.App.WithContext(ctx).Save(record)
-	if err != nil {
-		return nil, err
-	}
+		err = query.App.WithContext(ctx).Save(record)
+		if err != nil {
+			return err
+		}
 
-	err = gatewaysvc.Reconciliation(ctx)
+		err = gatewaysvc.Reconciliation(ctx)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}

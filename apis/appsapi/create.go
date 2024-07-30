@@ -29,12 +29,20 @@ func (Impl) AppsCreate(
 		Description: request.Body.Description,
 		Hostnames:   request.Body.Hostnames,
 	}
-	err := query.App.WithContext(ctx).Create(app)
-	if err != nil {
-		return nil, err
-	}
 
-	err = gatewaysvc.Reconciliation(ctx)
+	err := query.Q.Transaction(func(tx *query.Query) error {
+		err := query.App.WithContext(ctx).Create(app)
+		if err != nil {
+			return err
+		}
+
+		err = gatewaysvc.Reconciliation(ctx)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}

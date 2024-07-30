@@ -57,7 +57,12 @@ export default function PutInfoButton() {
   const { getFieldProperties } = useFieldProperties(formik);
 
   useEffect(() => {
-    formik.resetForm();
+    formik.resetForm({
+      values: {
+        title: appVar?.title ?? '',
+        description: appVar?.description ?? '',
+      },
+    });
   }, [isOpen]);
 
   return (

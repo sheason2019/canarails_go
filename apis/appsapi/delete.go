@@ -44,10 +44,17 @@ func (Impl) AppsDelete(
 		_, err = tx.App.WithContext(ctx).
 			Where(query.App.ID.Eq(uint(request.Id))).
 			Delete()
-		return err
-	})
+		if err != nil {
+			return err
+		}
 
-	err = gatewaysvc.Reconciliation(ctx)
+		err = gatewaysvc.Reconciliation(ctx)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}

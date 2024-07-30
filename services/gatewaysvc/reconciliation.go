@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"canarails.dev/query"
+	"gorm.io/gen/field"
 )
 
 // 全量同步
@@ -13,8 +14,13 @@ func Reconciliation(ctx context.Context) error {
 		Join(query.AppVariant, query.AppVariant.AppID.EqCol(query.App.ID)).
 		Where(query.AppVariant.Replicas.Gt(0)).
 		Where(query.AppVariant.ImageName.NotLike("")).
+		Where(field.Or(
+			query.AppVariant.Matches.Length().Gt(2),
+			query.AppVariant.ID.EqCol(query.App.DefaultVariantID),
+		)).
 		Preload(query.App.AppVariants).
 		Find()
+
 	if err != nil {
 		return fmt.Errorf("find apps error: %w", err)
 	}

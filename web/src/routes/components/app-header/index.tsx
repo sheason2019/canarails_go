@@ -1,7 +1,7 @@
-import { Link } from '@modern-js/runtime/router';
-import AppUser from './app-user';
+import AppUser from './components/app-user';
 import { AppBar, Toolbar, IconButton, Typography, Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import StyledLink from '@/common/styled-link';
 
 export default function AppHeader() {
   return (
@@ -17,17 +17,7 @@ export default function AppHeader() {
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          <Box
-            component={Link}
-            to="/"
-            sx={{
-              color: 'inherit',
-              textDecoration: 'none',
-              userSelect: 'none',
-            }}
-          >
-            Canarails
-          </Box>
+          <StyledLink to="/">Canarails</StyledLink>
         </Typography>
         <AppUser />
       </Toolbar>

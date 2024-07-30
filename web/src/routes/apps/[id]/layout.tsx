@@ -1,9 +1,4 @@
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useNavigate,
-} from '@modern-js/runtime/router';
+import { Outlet, useLocation, useNavigate } from '@modern-js/runtime/router';
 import { Box, Typography, Tabs, Tab } from '@mui/material';
 import useApp from './hooks/use-app';
 import { useMemo } from 'react';

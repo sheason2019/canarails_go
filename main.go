@@ -13,6 +13,7 @@ import (
 	"canarails.dev/services/envsvc"
 	"canarails.dev/services/gatewaysvc"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -34,6 +35,12 @@ func main() {
 	si := genapi.NewStrictHandler(ssi, nil)
 
 	genapi.RegisterHandlers(app, si)
+
+	app.Use(middleware.StaticWithConfig(middleware.StaticConfig{
+		HTML5: true,
+		Root:  "wwwroot",
+		Index: "html/main/index.html",
+	}))
 
 	log.Fatal(app.Start(":3000"))
 }

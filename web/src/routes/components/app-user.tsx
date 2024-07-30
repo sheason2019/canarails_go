@@ -7,8 +7,8 @@ export default function AppUser() {
 
   if (!isLogined) {
     return (
-      <Button color="inherit">
-        <StyledLink to="/login">登录</StyledLink>
+      <Button color="inherit" href="/login">
+        登录
       </Button>
     );
   }

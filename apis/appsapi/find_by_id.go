@@ -20,9 +20,10 @@ func (Impl) AppsFindById(
 	}
 
 	return genapi.AppsFindById200JSONResponse(genapi.App{
-		Id:          int32(record.ID),
-		Title:       record.Title,
-		Description: record.Description,
-		Hostnames:   record.Hostnames,
+		Id:               int32(record.ID),
+		Title:            record.Title,
+		Description:      record.Description,
+		Hostnames:        record.Hostnames,
+		DefaultVariantId: int32(record.DefaultVariantID),
 	}), nil
 }

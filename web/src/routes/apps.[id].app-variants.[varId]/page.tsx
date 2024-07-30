@@ -6,6 +6,7 @@ import PutInfoButton from './components/put-info-button';
 import PutConfigButton from './components/put-config-button';
 import HeaderMatches from './components/header-matches';
 import HeaderMatchAlert from './components/header-matches/header-match-alert';
+import AppVariantInfoAlert from './components/app-variant-info-alert';
 
 export default function Page() {
   const { data } = useAppVariant();
@@ -42,22 +43,25 @@ export default function Page() {
         </Typography>
         <PutConfigButton />
       </Stack>
-      <Descriptions
-        items={[
-          {
-            label: '映射端口',
-            value: appVar?.exposePort,
-          },
-          {
-            label: '镜像名称',
-            value: appVar?.imageName,
-          },
-          {
-            label: '实例数量',
-            value: appVar?.replicas,
-          },
-        ]}
-      />
+      <AppVariantInfoAlert />
+      <Box sx={{ my: 2 }}>
+        <Descriptions
+          items={[
+            {
+              label: '映射端口',
+              value: appVar?.exposePort,
+            },
+            {
+              label: '镜像名称',
+              value: appVar?.imageName,
+            },
+            {
+              label: '实例数量',
+              value: appVar?.replicas,
+            },
+          ]}
+        />
+      </Box>
       <Stack sx={{ my: 2 }} direction="row">
         <Typography variant="h5" sx={{ flex: 1 }}>
           标头匹配
@@ -65,7 +69,9 @@ export default function Page() {
         <AddHeaderMatchButton />
       </Stack>
       <HeaderMatchAlert />
-      <HeaderMatches />
+      <Box sx={{ my: 2 }}>
+        <HeaderMatches />
+      </Box>
     </main>
   );
 }

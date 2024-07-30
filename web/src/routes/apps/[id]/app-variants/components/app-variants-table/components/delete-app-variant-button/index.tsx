@@ -13,7 +13,7 @@ import useDialog from '@/common/use-dialog';
 import useSWRMutation from 'swr/mutation';
 import useApi from '@/common/use-api';
 import { useSnackbar } from 'notistack';
-import useAppVariants from '../hooks/use-app-variants';
+import useAppVariants from '../../hooks/use-app-variants';
 
 interface Props {
   appVar: components['schemas']['AppVariant'];

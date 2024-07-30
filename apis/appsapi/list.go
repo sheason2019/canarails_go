@@ -19,10 +19,11 @@ func (Impl) AppsList(
 	apps := make([]genapi.App, len(records))
 	for i, v := range records {
 		apps[i] = genapi.App{
-			Id:          int32(v.ID),
-			Title:       v.Title,
-			Description: v.Description,
-			Hostnames:   v.Hostnames,
+			Id:               int32(v.ID),
+			Title:            v.Title,
+			Description:      v.Description,
+			Hostnames:        v.Hostnames,
+			DefaultVariantId: int32(v.DefaultVariantID),
 		}
 	}
 

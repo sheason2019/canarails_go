@@ -17,12 +17,16 @@ func createRules(app *models.App) []json {
 	rules := make([]json, len(app.AppVariants))
 	for i, appVar := range app.AppVariants {
 		headers := make([]json, len(appVar.Matches))
-		for j, match := range appVar.Matches {
-			headers[j] = json{
-				"type":  "Exact",
-				"name":  match.Header,
-				"value": match.Value,
+		if app.DefaultVariantID != appVar.ID {
+			for j, match := range appVar.Matches {
+				headers[j] = json{
+					"type":  "Exact",
+					"name":  match.Header,
+					"value": match.Value,
+				}
 			}
+		} else {
+			headers = make([]json, 0)
 		}
 
 		rules[i] = json{

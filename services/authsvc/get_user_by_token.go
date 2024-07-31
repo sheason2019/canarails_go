@@ -3,6 +3,7 @@ package authsvc
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"canarails.dev/database/models"
 	"canarails.dev/query"
@@ -18,7 +19,26 @@ func getUserByToken(
 		return nil, fmt.Errorf("parse token string error: %w", err)
 	}
 
-	return query.User.WithContext(ctx).
+	usr, err := query.User.WithContext(ctx).
 		Where(query.User.ID.Eq(claim.UserId)).
 		First()
+	if err != nil {
+		return nil, err
+	}
+
+	if claim.UserTokenId == 0 {
+		return usr, nil
+	}
+
+	userToken, err := query.UserToken.WithContext(ctx).
+		Where(query.UserToken.ID.Eq(claim.UserTokenId)).
+		First()
+	if err != nil {
+		return nil, err
+	}
+	if userToken.ExpiredAt.Before(time.Now()) {
+		return nil, fmt.Errorf("token already expired")
+	}
+
+	return usr, err
 }

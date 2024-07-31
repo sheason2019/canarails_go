@@ -8,4 +8,6 @@ type User struct {
 	Username     string
 	PasswordHash []byte
 	PasswordSalt []byte
+
+	UserTokens []UserToken
 }

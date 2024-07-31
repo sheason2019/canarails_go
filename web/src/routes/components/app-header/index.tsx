@@ -5,7 +5,7 @@ import NavigationDrawer from './components/navigation-drawer';
 
 export default function AppHeader() {
   return (
-    <AppBar position="static">
+    <AppBar position="sticky">
       <Toolbar>
         <NavigationDrawer />
         <Typography variant="h6" component="div" sx={{ flexGrow: 1, ml: 2 }}>

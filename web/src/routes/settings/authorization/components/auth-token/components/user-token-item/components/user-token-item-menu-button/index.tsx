@@ -1,15 +1,15 @@
 import { useId } from 'react';
-import { components } from '@/api/api-gen';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { IconButton, Menu } from '@mui/material';
-import SetDefaultVariantMenuItem from './components/set-default-variant-menu-item';
 import useDialog from '@/common/use-dialog';
+import { UserToken } from '../../../../typings';
+import DeleteUserToken from './components/delete-user-token';
 
 interface Props {
-  appVar: components['schemas']['AppVariant'];
+  userToken: UserToken;
 }
 
-export default function ControlMenuButton({ appVar }: Props) {
+export default function UserTokenItemMenuButton({ userToken }: Props) {
   const { isOpen, anchorEl, onClose, onOpen } = useDialog();
 
   const buttonId = useId();
@@ -24,6 +24,7 @@ export default function ControlMenuButton({ appVar }: Props) {
         aria-haspopup="true"
         id={buttonId}
         onClick={onOpen}
+        size="small"
       >
         <MoreHorizIcon />
       </IconButton>
@@ -34,7 +35,7 @@ export default function ControlMenuButton({ appVar }: Props) {
         anchorEl={anchorEl}
         onClose={onClose}
       >
-        <SetDefaultVariantMenuItem onClose={onClose} appVar={appVar} />
+        <DeleteUserToken userToken={userToken} onClose={onClose} />
       </Menu>
     </>
   );

@@ -58,6 +58,16 @@ type AuthRes struct {
 	Username string `json:"username"`
 }
 
+// CreateUserTokenRes defines model for CreateUserTokenRes.
+type CreateUserTokenRes struct {
+	Description string `json:"description"`
+	ExpiredAt   int64  `json:"expiredAt"`
+	Id          int32  `json:"id"`
+	LastUsedAt  int64  `json:"lastUsedAt"`
+	Title       string `json:"title"`
+	TokenString string `json:"tokenString"`
+}
+
 // LoginReq defines model for LoginReq.
 type LoginReq struct {
 	Password string `json:"password"`
@@ -67,6 +77,15 @@ type LoginReq struct {
 // LoginRes defines model for LoginRes.
 type LoginRes struct {
 	Token string `json:"token"`
+}
+
+// UserToken defines model for UserToken.
+type UserToken struct {
+	Description string `json:"description"`
+	ExpiredAt   int64  `json:"expiredAt"`
+	Id          int32  `json:"id"`
+	LastUsedAt  int64  `json:"lastUsedAt"`
+	Title       string `json:"title"`
 }
 
 // AppVariantsListParams defines parameters for AppVariantsList.
@@ -88,6 +107,9 @@ type AppsPutJSONRequestBody = App
 
 // AuthLoginJSONRequestBody defines body for AuthLogin for application/json ContentType.
 type AuthLoginJSONRequestBody = LoginReq
+
+// UserTokensCreateJSONRequestBody defines body for UserTokensCreate for application/json ContentType.
+type UserTokensCreateJSONRequestBody = UserToken
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -127,6 +149,15 @@ type ServerInterface interface {
 
 	// (POST /api/auth/login)
 	AuthLogin(ctx echo.Context) error
+
+	// (GET /api/user-token)
+	UserTokensList(ctx echo.Context) error
+
+	// (POST /api/user-token)
+	UserTokensCreate(ctx echo.Context) error
+
+	// (DELETE /api/user-token/{id})
+	UserTokensDelete(ctx echo.Context, id int32) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -307,6 +338,40 @@ func (w *ServerInterfaceWrapper) AuthLogin(ctx echo.Context) error {
 	return err
 }
 
+// UserTokensList converts echo context to params.
+func (w *ServerInterfaceWrapper) UserTokensList(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.UserTokensList(ctx)
+	return err
+}
+
+// UserTokensCreate converts echo context to params.
+func (w *ServerInterfaceWrapper) UserTokensCreate(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.UserTokensCreate(ctx)
+	return err
+}
+
+// UserTokensDelete converts echo context to params.
+func (w *ServerInterfaceWrapper) UserTokensDelete(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id int32
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", ctx.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.UserTokensDelete(ctx, id)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -347,6 +412,9 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.PUT(baseURL+"/api/app/:id", wrapper.AppsPut)
 	router.GET(baseURL+"/api/auth", wrapper.AuthAuth)
 	router.POST(baseURL+"/api/auth/login", wrapper.AuthLogin)
+	router.GET(baseURL+"/api/user-token", wrapper.UserTokensList)
+	router.POST(baseURL+"/api/user-token", wrapper.UserTokensCreate)
+	router.DELETE(baseURL+"/api/user-token/:id", wrapper.UserTokensDelete)
 
 }
 
@@ -554,6 +622,56 @@ func (response AuthLogin200JSONResponse) VisitAuthLoginResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
+type UserTokensListRequestObject struct {
+}
+
+type UserTokensListResponseObject interface {
+	VisitUserTokensListResponse(w http.ResponseWriter) error
+}
+
+type UserTokensList200JSONResponse []UserToken
+
+func (response UserTokensList200JSONResponse) VisitUserTokensListResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UserTokensCreateRequestObject struct {
+	Body *UserTokensCreateJSONRequestBody
+}
+
+type UserTokensCreateResponseObject interface {
+	VisitUserTokensCreateResponse(w http.ResponseWriter) error
+}
+
+type UserTokensCreate200JSONResponse CreateUserTokenRes
+
+func (response UserTokensCreate200JSONResponse) VisitUserTokensCreateResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UserTokensDeleteRequestObject struct {
+	Id int32 `json:"id"`
+}
+
+type UserTokensDeleteResponseObject interface {
+	VisitUserTokensDeleteResponse(w http.ResponseWriter) error
+}
+
+type UserTokensDelete200JSONResponse int32
+
+func (response UserTokensDelete200JSONResponse) VisitUserTokensDeleteResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 
@@ -592,6 +710,15 @@ type StrictServerInterface interface {
 
 	// (POST /api/auth/login)
 	AuthLogin(ctx context.Context, request AuthLoginRequestObject) (AuthLoginResponseObject, error)
+
+	// (GET /api/user-token)
+	UserTokensList(ctx context.Context, request UserTokensListRequestObject) (UserTokensListResponseObject, error)
+
+	// (POST /api/user-token)
+	UserTokensCreate(ctx context.Context, request UserTokensCreateRequestObject) (UserTokensCreateResponseObject, error)
+
+	// (DELETE /api/user-token/{id})
+	UserTokensDelete(ctx context.Context, request UserTokensDeleteRequestObject) (UserTokensDeleteResponseObject, error)
 }
 
 type StrictHandlerFunc = strictecho.StrictEchoHandlerFunc
@@ -926,23 +1053,102 @@ func (sh *strictHandler) AuthLogin(ctx echo.Context) error {
 	return nil
 }
 
+// UserTokensList operation middleware
+func (sh *strictHandler) UserTokensList(ctx echo.Context) error {
+	var request UserTokensListRequestObject
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.UserTokensList(ctx.Request().Context(), request.(UserTokensListRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UserTokensList")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(UserTokensListResponseObject); ok {
+		return validResponse.VisitUserTokensListResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// UserTokensCreate operation middleware
+func (sh *strictHandler) UserTokensCreate(ctx echo.Context) error {
+	var request UserTokensCreateRequestObject
+
+	var body UserTokensCreateJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.UserTokensCreate(ctx.Request().Context(), request.(UserTokensCreateRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UserTokensCreate")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(UserTokensCreateResponseObject); ok {
+		return validResponse.VisitUserTokensCreateResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// UserTokensDelete operation middleware
+func (sh *strictHandler) UserTokensDelete(ctx echo.Context, id int32) error {
+	var request UserTokensDeleteRequestObject
+
+	request.Id = id
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.UserTokensDelete(ctx.Request().Context(), request.(UserTokensDeleteRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UserTokensDelete")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(UserTokensDeleteResponseObject); ok {
+		return validResponse.VisitUserTokensDeleteResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -33,6 +33,24 @@ func newUser(db *gorm.DB, opts ...gen.DOOption) user {
 	_user.Username = field.NewString(tableName, "username")
 	_user.PasswordHash = field.NewBytes(tableName, "password_hash")
 	_user.PasswordSalt = field.NewBytes(tableName, "password_salt")
+	_user.UserTokens = userHasManyUserTokens{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("UserTokens", "models.UserToken"),
+		User: struct {
+			field.RelationField
+			UserTokens struct {
+				field.RelationField
+			}
+		}{
+			RelationField: field.NewRelation("UserTokens.User", "models.User"),
+			UserTokens: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("UserTokens.User.UserTokens", "models.UserToken"),
+			},
+		},
+	}
 
 	_user.fillFieldMap()
 
@@ -50,6 +68,7 @@ type user struct {
 	Username     field.String
 	PasswordHash field.Bytes
 	PasswordSalt field.Bytes
+	UserTokens   userHasManyUserTokens
 
 	fieldMap map[string]field.Expr
 }
@@ -97,7 +116,7 @@ func (u *user) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (u *user) fillFieldMap() {
-	u.fieldMap = make(map[string]field.Expr, 7)
+	u.fieldMap = make(map[string]field.Expr, 8)
 	u.fieldMap["id"] = u.ID
 	u.fieldMap["created_at"] = u.CreatedAt
 	u.fieldMap["updated_at"] = u.UpdatedAt
@@ -105,6 +124,7 @@ func (u *user) fillFieldMap() {
 	u.fieldMap["username"] = u.Username
 	u.fieldMap["password_hash"] = u.PasswordHash
 	u.fieldMap["password_salt"] = u.PasswordSalt
+
 }
 
 func (u user) clone(db *gorm.DB) user {
@@ -115,6 +135,84 @@ func (u user) clone(db *gorm.DB) user {
 func (u user) replaceDB(db *gorm.DB) user {
 	u.userDo.ReplaceDB(db)
 	return u
+}
+
+type userHasManyUserTokens struct {
+	db *gorm.DB
+
+	field.RelationField
+
+	User struct {
+		field.RelationField
+		UserTokens struct {
+			field.RelationField
+		}
+	}
+}
+
+func (a userHasManyUserTokens) Where(conds ...field.Expr) *userHasManyUserTokens {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a userHasManyUserTokens) WithContext(ctx context.Context) *userHasManyUserTokens {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a userHasManyUserTokens) Session(session *gorm.Session) *userHasManyUserTokens {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a userHasManyUserTokens) Model(m *models.User) *userHasManyUserTokensTx {
+	return &userHasManyUserTokensTx{a.db.Model(m).Association(a.Name())}
+}
+
+type userHasManyUserTokensTx struct{ tx *gorm.Association }
+
+func (a userHasManyUserTokensTx) Find() (result []*models.UserToken, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a userHasManyUserTokensTx) Append(values ...*models.UserToken) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a userHasManyUserTokensTx) Replace(values ...*models.UserToken) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a userHasManyUserTokensTx) Delete(values ...*models.UserToken) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a userHasManyUserTokensTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a userHasManyUserTokensTx) Count() int64 {
+	return a.tx.Count()
 }
 
 type userDo struct{ gen.DO }

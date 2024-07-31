@@ -21,6 +21,7 @@ var (
 	AppVariant  *appVariant
 	PersistData *persistData
 	User        *user
+	UserToken   *userToken
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
@@ -29,6 +30,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	AppVariant = &Q.AppVariant
 	PersistData = &Q.PersistData
 	User = &Q.User
+	UserToken = &Q.UserToken
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
@@ -38,6 +40,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		AppVariant:  newAppVariant(db, opts...),
 		PersistData: newPersistData(db, opts...),
 		User:        newUser(db, opts...),
+		UserToken:   newUserToken(db, opts...),
 	}
 }
 
@@ -48,6 +51,7 @@ type Query struct {
 	AppVariant  appVariant
 	PersistData persistData
 	User        user
+	UserToken   userToken
 }
 
 func (q *Query) Available() bool { return q.db != nil }
@@ -59,6 +63,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		AppVariant:  q.AppVariant.clone(db),
 		PersistData: q.PersistData.clone(db),
 		User:        q.User.clone(db),
+		UserToken:   q.UserToken.clone(db),
 	}
 }
 
@@ -77,6 +82,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		AppVariant:  q.AppVariant.replaceDB(db),
 		PersistData: q.PersistData.replaceDB(db),
 		User:        q.User.replaceDB(db),
+		UserToken:   q.UserToken.replaceDB(db),
 	}
 }
 
@@ -85,6 +91,7 @@ type queryCtx struct {
 	AppVariant  IAppVariantDo
 	PersistData IPersistDataDo
 	User        IUserDo
+	UserToken   IUserTokenDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
@@ -93,6 +100,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		AppVariant:  q.AppVariant.WithContext(ctx),
 		PersistData: q.PersistData.WithContext(ctx),
 		User:        q.User.WithContext(ctx),
+		UserToken:   q.UserToken.WithContext(ctx),
 	}
 }
 

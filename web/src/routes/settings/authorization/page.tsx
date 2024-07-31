@@ -1,11 +1,13 @@
 import { Typography } from '@mui/material';
+import AuthToken from './components/auth-token';
 
-export default function Settings() {
+export default function AuthorizationSetting() {
   return (
     <main>
       <Typography sx={{ mb: 3 }} variant="h5">
-        用户信息
+        权限
       </Typography>
+      <AuthToken />
     </main>
   );
 }

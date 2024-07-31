@@ -5,4 +5,5 @@ var Models = []any{
 	&AppVariant{},
 	&PersistData{},
 	&User{},
+	&UserToken{},
 }

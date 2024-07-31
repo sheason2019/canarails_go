@@ -14,12 +14,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserClaims struct {
-	jwt.RegisteredClaims
-
-	UserId uint
-}
-
 func New(ctx context.Context, usr *models.User) *UserClaims {
 	return &UserClaims{
 		RegisteredClaims: jwt.RegisteredClaims{

@@ -11,9 +11,10 @@ interface Props {
   icon: ReactNode;
   label: ReactNode;
   to: string;
-  onClose(): void;
+  onClose?(): void;
   target?: HTMLAttributeAnchorTarget;
   suffix?: ReactNode;
+  selected?: boolean;
 }
 
 export default function NavigationItem({
@@ -22,12 +23,13 @@ export default function NavigationItem({
   suffix,
   to,
   target,
+  selected,
   onClose,
 }: Props) {
   return (
     <StyledLink to={to} target={target} onClick={onClose}>
       <ListItem disablePadding>
-        <ListItemButton>
+        <ListItemButton selected={selected}>
           <ListItemIcon>{icon}</ListItemIcon>
           <ListItemText primary={label} />
           {suffix}

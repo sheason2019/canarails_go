@@ -41,6 +41,14 @@ interface AppVariants {
   @useAuth(BasicAuth)
   put(@body appVariant: AppVariant, @path id: int32): int32;
 
+  @put
+  @useAuth(BasicAuth)
+  batchPut(@body appVariant: AppVariant, @query title: string): int32;
+
+  @delete
+  @useAuth(BasicAuth)
+  batchDelete(@query title: string): int32;
+
   @get
   @route("{id}")
   findById(@path id: int32): AppVariant;

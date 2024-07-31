@@ -88,9 +88,19 @@ type UserToken struct {
 	Title       string `json:"title"`
 }
 
+// AppVariantsBatchDeleteParams defines parameters for AppVariantsBatchDelete.
+type AppVariantsBatchDeleteParams struct {
+	Title string `form:"title" json:"title"`
+}
+
 // AppVariantsListParams defines parameters for AppVariantsList.
 type AppVariantsListParams struct {
 	AppId int32 `form:"appId" json:"appId"`
+}
+
+// AppVariantsBatchPutParams defines parameters for AppVariantsBatchPut.
+type AppVariantsBatchPutParams struct {
+	Title string `form:"title" json:"title"`
 }
 
 // AppsCreateJSONRequestBody defines body for AppsCreate for application/json ContentType.
@@ -98,6 +108,9 @@ type AppsCreateJSONRequestBody = App
 
 // AppVariantsCreateJSONRequestBody defines body for AppVariantsCreate for application/json ContentType.
 type AppVariantsCreateJSONRequestBody = AppVariant
+
+// AppVariantsBatchPutJSONRequestBody defines body for AppVariantsBatchPut for application/json ContentType.
+type AppVariantsBatchPutJSONRequestBody = AppVariant
 
 // AppVariantsPutJSONRequestBody defines body for AppVariantsPut for application/json ContentType.
 type AppVariantsPutJSONRequestBody = AppVariant
@@ -120,11 +133,17 @@ type ServerInterface interface {
 	// (POST /api/app)
 	AppsCreate(ctx echo.Context) error
 
+	// (DELETE /api/app-variant)
+	AppVariantsBatchDelete(ctx echo.Context, params AppVariantsBatchDeleteParams) error
+
 	// (GET /api/app-variant)
 	AppVariantsList(ctx echo.Context, params AppVariantsListParams) error
 
 	// (POST /api/app-variant)
 	AppVariantsCreate(ctx echo.Context) error
+
+	// (PUT /api/app-variant)
+	AppVariantsBatchPut(ctx echo.Context, params AppVariantsBatchPutParams) error
 
 	// (DELETE /api/app-variant/{id})
 	AppVariantsDelete(ctx echo.Context, id int32) error
@@ -185,6 +204,26 @@ func (w *ServerInterfaceWrapper) AppsCreate(ctx echo.Context) error {
 	return err
 }
 
+// AppVariantsBatchDelete converts echo context to params.
+func (w *ServerInterfaceWrapper) AppVariantsBatchDelete(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BasicAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params AppVariantsBatchDeleteParams
+	// ------------- Required query parameter "title" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "title", ctx.QueryParams(), &params.Title)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter title: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AppVariantsBatchDelete(ctx, params)
+	return err
+}
+
 // AppVariantsList converts echo context to params.
 func (w *ServerInterfaceWrapper) AppVariantsList(ctx echo.Context) error {
 	var err error
@@ -211,6 +250,26 @@ func (w *ServerInterfaceWrapper) AppVariantsCreate(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.AppVariantsCreate(ctx)
+	return err
+}
+
+// AppVariantsBatchPut converts echo context to params.
+func (w *ServerInterfaceWrapper) AppVariantsBatchPut(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BasicAuthScopes, []string{})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params AppVariantsBatchPutParams
+	// ------------- Required query parameter "title" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "title", ctx.QueryParams(), &params.Title)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter title: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.AppVariantsBatchPut(ctx, params)
 	return err
 }
 
@@ -351,6 +410,8 @@ func (w *ServerInterfaceWrapper) UserTokensList(ctx echo.Context) error {
 func (w *ServerInterfaceWrapper) UserTokensCreate(ctx echo.Context) error {
 	var err error
 
+	ctx.Set(BasicAuthScopes, []string{})
+
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.UserTokensCreate(ctx)
 	return err
@@ -366,6 +427,8 @@ func (w *ServerInterfaceWrapper) UserTokensDelete(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
 	}
+
+	ctx.Set(BasicAuthScopes, []string{})
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.UserTokensDelete(ctx, id)
@@ -402,8 +465,10 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.GET(baseURL+"/api/app", wrapper.AppsList)
 	router.POST(baseURL+"/api/app", wrapper.AppsCreate)
+	router.DELETE(baseURL+"/api/app-variant", wrapper.AppVariantsBatchDelete)
 	router.GET(baseURL+"/api/app-variant", wrapper.AppVariantsList)
 	router.POST(baseURL+"/api/app-variant", wrapper.AppVariantsCreate)
+	router.PUT(baseURL+"/api/app-variant", wrapper.AppVariantsBatchPut)
 	router.DELETE(baseURL+"/api/app-variant/:id", wrapper.AppVariantsDelete)
 	router.GET(baseURL+"/api/app-variant/:id", wrapper.AppVariantsFindById)
 	router.PUT(baseURL+"/api/app-variant/:id", wrapper.AppVariantsPut)
@@ -451,6 +516,23 @@ func (response AppsCreate200JSONResponse) VisitAppsCreateResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
+type AppVariantsBatchDeleteRequestObject struct {
+	Params AppVariantsBatchDeleteParams
+}
+
+type AppVariantsBatchDeleteResponseObject interface {
+	VisitAppVariantsBatchDeleteResponse(w http.ResponseWriter) error
+}
+
+type AppVariantsBatchDelete200JSONResponse int32
+
+func (response AppVariantsBatchDelete200JSONResponse) VisitAppVariantsBatchDeleteResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type AppVariantsListRequestObject struct {
 	Params AppVariantsListParams
 }
@@ -479,6 +561,24 @@ type AppVariantsCreateResponseObject interface {
 type AppVariantsCreate200JSONResponse int32
 
 func (response AppVariantsCreate200JSONResponse) VisitAppVariantsCreateResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type AppVariantsBatchPutRequestObject struct {
+	Params AppVariantsBatchPutParams
+	Body   *AppVariantsBatchPutJSONRequestBody
+}
+
+type AppVariantsBatchPutResponseObject interface {
+	VisitAppVariantsBatchPutResponse(w http.ResponseWriter) error
+}
+
+type AppVariantsBatchPut200JSONResponse int32
+
+func (response AppVariantsBatchPut200JSONResponse) VisitAppVariantsBatchPutResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
@@ -681,11 +781,17 @@ type StrictServerInterface interface {
 	// (POST /api/app)
 	AppsCreate(ctx context.Context, request AppsCreateRequestObject) (AppsCreateResponseObject, error)
 
+	// (DELETE /api/app-variant)
+	AppVariantsBatchDelete(ctx context.Context, request AppVariantsBatchDeleteRequestObject) (AppVariantsBatchDeleteResponseObject, error)
+
 	// (GET /api/app-variant)
 	AppVariantsList(ctx context.Context, request AppVariantsListRequestObject) (AppVariantsListResponseObject, error)
 
 	// (POST /api/app-variant)
 	AppVariantsCreate(ctx context.Context, request AppVariantsCreateRequestObject) (AppVariantsCreateResponseObject, error)
+
+	// (PUT /api/app-variant)
+	AppVariantsBatchPut(ctx context.Context, request AppVariantsBatchPutRequestObject) (AppVariantsBatchPutResponseObject, error)
 
 	// (DELETE /api/app-variant/{id})
 	AppVariantsDelete(ctx context.Context, request AppVariantsDeleteRequestObject) (AppVariantsDeleteResponseObject, error)
@@ -785,6 +891,31 @@ func (sh *strictHandler) AppsCreate(ctx echo.Context) error {
 	return nil
 }
 
+// AppVariantsBatchDelete operation middleware
+func (sh *strictHandler) AppVariantsBatchDelete(ctx echo.Context, params AppVariantsBatchDeleteParams) error {
+	var request AppVariantsBatchDeleteRequestObject
+
+	request.Params = params
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AppVariantsBatchDelete(ctx.Request().Context(), request.(AppVariantsBatchDeleteRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AppVariantsBatchDelete")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AppVariantsBatchDeleteResponseObject); ok {
+		return validResponse.VisitAppVariantsBatchDeleteResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // AppVariantsList operation middleware
 func (sh *strictHandler) AppVariantsList(ctx echo.Context, params AppVariantsListParams) error {
 	var request AppVariantsListRequestObject
@@ -833,6 +964,37 @@ func (sh *strictHandler) AppVariantsCreate(ctx echo.Context) error {
 		return err
 	} else if validResponse, ok := response.(AppVariantsCreateResponseObject); ok {
 		return validResponse.VisitAppVariantsCreateResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// AppVariantsBatchPut operation middleware
+func (sh *strictHandler) AppVariantsBatchPut(ctx echo.Context, params AppVariantsBatchPutParams) error {
+	var request AppVariantsBatchPutRequestObject
+
+	request.Params = params
+
+	var body AppVariantsBatchPutJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.AppVariantsBatchPut(ctx.Request().Context(), request.(AppVariantsBatchPutRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AppVariantsBatchPut")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(AppVariantsBatchPutResponseObject); ok {
+		return validResponse.VisitAppVariantsBatchPutResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("unexpected response type: %T", response)
 	}
@@ -1133,22 +1295,23 @@ func (sh *strictHandler) UserTokensDelete(ctx echo.Context, id int32) error {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"je/Ge5/zYlb8GwAA//+nPNuZUiAAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -21,6 +21,7 @@ model CreateUserTokenRes is UserToken {
 @route("/api/user-token")
 interface UserTokens {
   @post
+  @useAuth(BasicAuth)
   create(@body userToken: UserToken): CreateUserTokenRes;
 
   @get
@@ -28,5 +29,6 @@ interface UserTokens {
 
   @delete
   @route("{id}")
+  @useAuth(BasicAuth)
   delete(@path id: int32): int32;
 }

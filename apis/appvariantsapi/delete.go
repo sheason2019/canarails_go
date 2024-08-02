@@ -24,8 +24,8 @@ func (Impl) AppVariantsDelete(
 	}
 
 	err := query.Q.Transaction(func(tx *query.Query) error {
-		_, err := query.AppVariant.WithContext(ctx).
-			Where(query.AppVariant.ID.Eq(uint(request.Id))).
+		_, err := tx.AppVariant.WithContext(ctx).
+			Where(tx.AppVariant.ID.Eq(uint(request.Id))).
 			Delete()
 		if err != nil {
 			return err

@@ -31,7 +31,7 @@ func (Impl) AppsCreate(
 	}
 
 	err := query.Q.Transaction(func(tx *query.Query) error {
-		err := query.App.WithContext(ctx).Create(app)
+		err := tx.App.WithContext(ctx).Create(app)
 		if err != nil {
 			return err
 		}

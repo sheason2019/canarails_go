@@ -28,7 +28,7 @@ func (Impl) AppsDelete(
 	err := query.Q.Transaction(func(tx *query.Query) error {
 		// app variants
 		appVariants, err := tx.AppVariant.WithContext(ctx).
-			Where(query.AppVariant.AppID.Eq(uint(request.Id))).
+			Where(tx.AppVariant.AppID.Eq(uint(request.Id))).
 			Find()
 		if err != nil {
 			return fmt.Errorf("find app variants error: %w", err)
@@ -42,7 +42,7 @@ func (Impl) AppsDelete(
 
 		// app
 		_, err = tx.App.WithContext(ctx).
-			Where(query.App.ID.Eq(uint(request.Id))).
+			Where(tx.App.ID.Eq(uint(request.Id))).
 			Delete()
 		if err != nil {
 			return err

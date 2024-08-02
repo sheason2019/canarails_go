@@ -21,12 +21,14 @@ model AppVariantMatch {
   value: string;
 }
 
+model OptionalAppVariant is OptionalProperties<AppVariant>;
+
 @tag("AppVariantController")
 @route("/api/app-variant")
 interface AppVariants {
   @post
   @useAuth(BasicAuth)
-  create(@body appVariant: AppVariant): int32;
+  create(@body appVariant: OptionalAppVariant): int32;
 
   @get
   list(@query appId: int32): AppVariant[];
@@ -41,9 +43,14 @@ interface AppVariants {
   @useAuth(BasicAuth)
   put(@body appVariant: AppVariant, @path id: int32): int32;
 
-  @put
+  @patch
   @useAuth(BasicAuth)
-  batchPut(@body appVariant: AppVariant, @query title: string): int32;
+  batchPatch(
+    @body appVariant: OptionalAppVariant,
+    @query appId: int32,
+    @query title?: string,
+    @query id?: int32,
+  ): int32;
 
   @delete
   @useAuth(BasicAuth)

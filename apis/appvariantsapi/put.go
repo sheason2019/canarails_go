@@ -28,8 +28,8 @@ func (Impl) AppVariantsPut(
 	body := request.Body
 
 	err := query.Q.Transaction(func(tx *query.Query) error {
-		record, err := query.AppVariant.WithContext(ctx).
-			Where(query.AppVariant.ID.Eq(uint(request.Id))).
+		record, err := tx.AppVariant.WithContext(ctx).
+			Where(tx.AppVariant.ID.Eq(uint(request.Id))).
 			First()
 		if err != nil {
 			return fmt.Errorf("find app variant by id error: %w", err)
@@ -49,7 +49,7 @@ func (Impl) AppVariantsPut(
 		}
 		record.Matches = matches
 
-		err = query.AppVariant.WithContext(ctx).Save(record)
+		err = tx.AppVariant.WithContext(ctx).Save(record)
 		if err != nil {
 			return err
 		}

@@ -36,13 +36,9 @@ export default function AddAppVariantButton() {
     onSubmit: async values => {
       const res = await api.POST('/api/app-variant', {
         body: {
-          id: 0,
           title: values.title,
           description: values.description,
           appId: Number(id),
-          matches: [],
-          imageName: '',
-          replicas: 0,
           exposePort: 80,
         },
       });

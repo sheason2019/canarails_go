@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"canarails.dev/apis/genapi"
-	"canarails.dev/database/models"
 	"canarails.dev/query"
 	"canarails.dev/services/authsvc"
 	"canarails.dev/services/gatewaysvc"
+	"canarails.dev/services/recordsvc"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,19 +24,9 @@ func (Impl) AppVariantsCreate(
 		return nil, echo.ErrForbidden
 	}
 
-	body := request.Body
-
-	appVar := &models.AppVariant{
-		Title:       body.Title,
-		Description: body.Description,
-		ExposePort:  uint(body.ExposePort),
-		ImageName:   body.ImageName,
-		Replicas:    uint(body.Replicas),
-		AppID:       uint(body.AppId),
-	}
-
+	appVar := recordsvc.MapAppVar(request.Body)
 	err := query.Q.Transaction(func(tx *query.Query) error {
-		err := query.AppVariant.WithContext(ctx).Create(appVar)
+		err := tx.AppVariant.WithContext(ctx).Create(appVar)
 		if err != nil {
 			return err
 		}

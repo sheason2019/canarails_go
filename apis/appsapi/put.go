@@ -24,8 +24,8 @@ func (Impl) AppsPut(
 	}
 
 	err := query.Q.Transaction(func(tx *query.Query) error {
-		record, err := query.App.WithContext(ctx).
-			Where(query.App.ID.Eq(uint(request.Id))).
+		record, err := tx.App.WithContext(ctx).
+			Where(tx.App.ID.Eq(uint(request.Id))).
 			First()
 		if err != nil {
 			return err
@@ -36,7 +36,7 @@ func (Impl) AppsPut(
 		record.Hostnames = request.Body.Hostnames
 		record.DefaultVariantID = uint(request.Body.DefaultVariantId)
 
-		err = query.App.WithContext(ctx).Save(record)
+		err = tx.App.WithContext(ctx).Save(record)
 		if err != nil {
 			return err
 		}

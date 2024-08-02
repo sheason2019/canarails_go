@@ -24,7 +24,7 @@ func main() {
 	// 初始化 admin 用户密码
 	authsvc.SetupAdminPassword(context.Background(), os.Getenv(envsvc.ADMIN_PASSWORD))
 	// 同步 Gateway
-	err := gatewaysvc.Reconciliation(context.Background())
+	err := gatewaysvc.Reconciliation(context.Background(), query.Q)
 	if err != nil {
 		log.Fatalln("初始化 Canarails 失败：", err)
 	}

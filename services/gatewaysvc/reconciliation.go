@@ -9,16 +9,16 @@ import (
 )
 
 // 全量同步
-func Reconciliation(ctx context.Context) error {
-	appVars, err := query.AppVariant.WithContext(ctx).
-		Join(query.App, query.AppVariant.AppID.EqCol(query.App.ID)).
-		Where(query.AppVariant.Replicas.Gt(0)).
-		Where(query.AppVariant.ImageName.NotLike("")).
+func Reconciliation(ctx context.Context, repo *query.Query) error {
+	appVars, err := repo.AppVariant.WithContext(ctx).
+		Join(repo.App, repo.AppVariant.AppID.EqCol(repo.App.ID)).
+		Where(repo.AppVariant.Replicas.Gt(0)).
+		Where(repo.AppVariant.ImageName.NotLike("")).
 		Where(field.Or(
-			query.AppVariant.Matches.Length().Gt(2),
-			query.AppVariant.ID.EqCol(query.App.DefaultVariantID),
+			repo.AppVariant.Matches.Length().Gt(2),
+			repo.AppVariant.ID.EqCol(repo.App.DefaultVariantID),
 		)).
-		Select(query.AppVariant.ID).
+		Select(repo.AppVariant.ID).
 		Find()
 	if err != nil {
 		return fmt.Errorf("query valid app variant error: %w", err)
@@ -29,12 +29,12 @@ func Reconciliation(ctx context.Context) error {
 		appVarIds[i] = v.ID
 	}
 
-	apps, err := query.App.WithContext(ctx).
-		Join(query.AppVariant, query.AppVariant.AppID.EqCol(query.App.ID)).
-		Where(query.App.Hostnames.Length().Gt(2)).
-		Where(query.AppVariant.ID.In(appVarIds...)).
-		Preload(query.App.AppVariants.On(
-			query.AppVariant.ID.In(appVarIds...),
+	apps, err := repo.App.WithContext(ctx).
+		Join(repo.AppVariant, repo.AppVariant.AppID.EqCol(repo.App.ID)).
+		Where(repo.App.Hostnames.Length().Gt(2)).
+		Where(repo.AppVariant.ID.In(appVarIds...)).
+		Preload(repo.App.AppVariants.On(
+			repo.AppVariant.ID.In(appVarIds...),
 		)).
 		Find()
 

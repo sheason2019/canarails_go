@@ -41,7 +41,7 @@ func (Impl) AppsPut(
 			return err
 		}
 
-		err = gatewaysvc.Reconciliation(ctx)
+		err = gatewaysvc.Reconciliation(ctx, tx)
 		if err != nil {
 			return err
 		}

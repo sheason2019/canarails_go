@@ -44,7 +44,10 @@ export default function Layout() {
           </Typography>
         </Stack>
         <Typography variant="body2" color="GrayText">
-          ID {appVar?.id}
+          APP ID - {app?.id}
+        </Typography>
+        <Typography variant="body2" color="GrayText">
+          流量泳道 ID - {appVar?.id}
         </Typography>
       </Box>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>

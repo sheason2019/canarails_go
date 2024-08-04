@@ -26,7 +26,7 @@ export default function Layout() {
       <Box sx={{ mt: 2, mb: 1 }}>
         <Typography variant="h4">{app?.title}</Typography>
         <Typography variant="body2" color="GrayText">
-          ID {app?.id}
+          APP ID - {app?.id}
         </Typography>
       </Box>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>

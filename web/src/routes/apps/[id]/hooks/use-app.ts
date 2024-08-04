@@ -6,11 +6,16 @@ export default function useApp() {
   const api = useApi();
 
   const { id } = useParams();
-  return useSWR(['app', id], () =>
-    api.GET('/api/app/{id}', {
-      params: {
-        path: { id: Number(id) },
-      },
-    }),
+  return useSWR(
+    ['app', id],
+    () =>
+      api.GET('/api/app/{id}', {
+        params: {
+          path: { id: Number(id) },
+        },
+      }),
+    {
+      suspense: true,
+    },
   );
 }

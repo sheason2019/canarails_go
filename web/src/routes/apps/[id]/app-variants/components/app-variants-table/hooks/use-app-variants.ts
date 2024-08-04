@@ -6,13 +6,18 @@ export default function useAppVariants() {
   const { id } = useParams();
   const api = useApi();
 
-  return useSWR(['app-variants', id], () =>
-    api.GET('/api/app-variant', {
-      params: {
-        query: {
-          appId: Number(id),
+  return useSWR(
+    ['app-variants', id],
+    () =>
+      api.GET('/api/app-variant', {
+        params: {
+          query: {
+            appId: Number(id),
+          },
         },
-      },
-    }),
+      }),
+    {
+      suspense: true,
+    },
   );
 }

@@ -3,6 +3,7 @@ import { paths } from '@/api/api-gen';
 import { useMemo } from 'react';
 import { useSnackbar } from 'notistack';
 import useToken from './user/use-token';
+import { UnloginError } from './errors/unlogin-error';
 
 interface Props {
   toastWhenError?: boolean;
@@ -25,7 +26,7 @@ export default function useApi(props?: Props) {
           if (toastWhenError) {
             enqueueSnackbar('当前用户未登录', { variant: 'error' });
           }
-          throw new Error('当前用户未登录');
+          throw new UnloginError('当前用户未登录');
         }
 
         if (!response.ok) {

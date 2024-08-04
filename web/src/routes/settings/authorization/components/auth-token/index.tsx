@@ -1,4 +1,4 @@
-import { Paper, Stack, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import useUserToken from './hooks/use-user-token';
 import AddUserTokenButton from './components/add-user-token-button';
 import { useMemo, useState } from 'react';

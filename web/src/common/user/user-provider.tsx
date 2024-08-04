@@ -1,25 +1,15 @@
 import { PropsWithChildren, useEffect, useRef } from 'react';
 import useToken from './use-token';
+import useUser from './use-user';
 
 export default function UserProvider({ children }: PropsWithChildren) {
-  const initRef = useRef(false);
-  const { token, setToken } = useToken();
-
-  // 初始化 token
-  useEffect(() => {
-    const localToken = localStorage.getItem('Authorization');
-    if (localToken) {
-      setToken(localToken);
-    }
-
-    initRef.current = true;
-  }, []);
+  const { token } = useToken();
+  const { mutate } = useUser();
 
   // 持久化 token
   useEffect(() => {
-    if (!initRef.current) return;
-
     localStorage.setItem('Authorization', token);
+    mutate();
   }, [token]);
 
   return <>{children}</>;

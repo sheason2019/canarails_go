@@ -2,7 +2,7 @@ import { atom, useRecoilState } from 'recoil';
 
 const tokenState = atom({
   key: 'token-string',
-  default: '',
+  default: localStorage.getItem('Authorization') ?? '',
 });
 
 export default function useToken() {

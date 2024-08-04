@@ -1,16 +1,28 @@
 import useSWR from 'swr';
 import useToken from './use-token';
 import useApi from '../use-api';
+import { UnloginError } from '../errors/unlogin-error';
 
 export default function useUser() {
   const api = useApi({ toastWhenError: false });
-  const { token, setToken } = useToken();
+  const { setToken } = useToken();
 
-  const { data, error, isLoading } = useSWR(
-    ['auth/user', token],
-    () => api.GET('/api/auth'),
+  const { data, isLoading, mutate } = useSWR(
+     'auth/user',
+    async () => {
+      try {
+        return await api.GET('/api/auth');
+      } catch (e) {
+        if (e instanceof UnloginError) {
+          return null;
+        }
+
+        throw e;
+      }
+    },
     {
       shouldRetryOnError: false,
+      suspense: true,
     },
   );
 
@@ -20,7 +32,9 @@ export default function useUser() {
 
   return {
     user: data?.data,
-    isLogined: !Boolean(error) && !Boolean(data?.error) && !isLoading,
+    isLogined: !!data,
+    isLoading,
     logout,
+    mutate,
   };
 }

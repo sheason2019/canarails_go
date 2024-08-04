@@ -13,6 +13,7 @@ func Reconciliation(ctx context.Context, repo *query.Query) error {
 	appVars, err := repo.AppVariant.WithContext(ctx).
 		Join(repo.App, repo.AppVariant.AppID.EqCol(repo.App.ID)).
 		Where(repo.AppVariant.Replicas.Gt(0)).
+		Where(repo.AppVariant.ExposePort.Gt(0)).
 		Where(repo.AppVariant.ImageName.NotLike("")).
 		Where(field.Or(
 			repo.AppVariant.Matches.Length().Gt(2),

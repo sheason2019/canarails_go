@@ -31,7 +31,7 @@ jobs:
           npm run build
       - name: Build Go Server
         run: |
-          go build -o bin/canarails .
+          sh build.sh
       - name: Build & Push Image
         run: |
           docker build . -t sheason/canarails:${{ github.sha }} -t sheason/canarails:latest

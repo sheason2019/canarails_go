@@ -100,6 +100,12 @@ type UserToken struct {
 	Title       string `json:"title"`
 }
 
+// Version defines model for Version.
+type Version struct {
+	BuildTime string `json:"buildTime"`
+	GitHash   string `json:"gitHash"`
+}
+
 // AppVariantsBatchDeleteParams defines parameters for AppVariantsBatchDelete.
 type AppVariantsBatchDeleteParams struct {
 	Title string `form:"title" json:"title"`
@@ -115,6 +121,11 @@ type AppVariantsBatchPatchParams struct {
 	AppId int32   `form:"appId" json:"appId"`
 	Title *string `form:"title,omitempty" json:"title,omitempty"`
 	Id    *int32  `form:"id,omitempty" json:"id,omitempty"`
+}
+
+// VersionsUpdateJSONBody defines parameters for VersionsUpdate.
+type VersionsUpdateJSONBody struct {
+	GitHash string `json:"gitHash"`
 }
 
 // AppsCreateJSONRequestBody defines body for AppsCreate for application/json ContentType.
@@ -137,6 +148,9 @@ type AuthLoginJSONRequestBody = LoginReq
 
 // UserTokensCreateJSONRequestBody defines body for UserTokensCreate for application/json ContentType.
 type UserTokensCreateJSONRequestBody = UserToken
+
+// VersionsUpdateJSONRequestBody defines body for VersionsUpdate for application/json ContentType.
+type VersionsUpdateJSONRequestBody VersionsUpdateJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -191,6 +205,15 @@ type ServerInterface interface {
 
 	// (DELETE /api/user-token/{id})
 	UserTokensDelete(ctx echo.Context, id int32) error
+
+	// (GET /api/version)
+	VersionsGetVersion(ctx echo.Context) error
+
+	// (GET /api/version/update)
+	VersionsCheckUpdate(ctx echo.Context) error
+
+	// (POST /api/version/update)
+	VersionsUpdate(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
@@ -463,6 +486,33 @@ func (w *ServerInterfaceWrapper) UserTokensDelete(ctx echo.Context) error {
 	return err
 }
 
+// VersionsGetVersion converts echo context to params.
+func (w *ServerInterfaceWrapper) VersionsGetVersion(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.VersionsGetVersion(ctx)
+	return err
+}
+
+// VersionsCheckUpdate converts echo context to params.
+func (w *ServerInterfaceWrapper) VersionsCheckUpdate(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.VersionsCheckUpdate(ctx)
+	return err
+}
+
+// VersionsUpdate converts echo context to params.
+func (w *ServerInterfaceWrapper) VersionsUpdate(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.VersionsUpdate(ctx)
+	return err
+}
+
 // This is a simple interface which specifies echo.Route addition functions which
 // are present on both echo.Echo and echo.Group, since we want to allow using
 // either of them for path registration
@@ -508,6 +558,9 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/api/user-token", wrapper.UserTokensList)
 	router.POST(baseURL+"/api/user-token", wrapper.UserTokensCreate)
 	router.DELETE(baseURL+"/api/user-token/:id", wrapper.UserTokensDelete)
+	router.GET(baseURL+"/api/version", wrapper.VersionsGetVersion)
+	router.GET(baseURL+"/api/version/update", wrapper.VersionsCheckUpdate)
+	router.POST(baseURL+"/api/version/update", wrapper.VersionsUpdate)
 
 }
 
@@ -800,6 +853,54 @@ func (response UserTokensDelete200JSONResponse) VisitUserTokensDeleteResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
+type VersionsGetVersionRequestObject struct {
+}
+
+type VersionsGetVersionResponseObject interface {
+	VisitVersionsGetVersionResponse(w http.ResponseWriter) error
+}
+
+type VersionsGetVersion200JSONResponse Version
+
+func (response VersionsGetVersion200JSONResponse) VisitVersionsGetVersionResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type VersionsCheckUpdateRequestObject struct {
+}
+
+type VersionsCheckUpdateResponseObject interface {
+	VisitVersionsCheckUpdateResponse(w http.ResponseWriter) error
+}
+
+type VersionsCheckUpdate200JSONResponse Version
+
+func (response VersionsCheckUpdate200JSONResponse) VisitVersionsCheckUpdateResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type VersionsUpdateRequestObject struct {
+	Body *VersionsUpdateJSONRequestBody
+}
+
+type VersionsUpdateResponseObject interface {
+	VisitVersionsUpdateResponse(w http.ResponseWriter) error
+}
+
+type VersionsUpdate204Response struct {
+}
+
+func (response VersionsUpdate204Response) VisitVersionsUpdateResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 
@@ -853,6 +954,15 @@ type StrictServerInterface interface {
 
 	// (DELETE /api/user-token/{id})
 	UserTokensDelete(ctx context.Context, request UserTokensDeleteRequestObject) (UserTokensDeleteResponseObject, error)
+
+	// (GET /api/version)
+	VersionsGetVersion(ctx context.Context, request VersionsGetVersionRequestObject) (VersionsGetVersionResponseObject, error)
+
+	// (GET /api/version/update)
+	VersionsCheckUpdate(ctx context.Context, request VersionsCheckUpdateRequestObject) (VersionsCheckUpdateResponseObject, error)
+
+	// (POST /api/version/update)
+	VersionsUpdate(ctx context.Context, request VersionsUpdateRequestObject) (VersionsUpdateResponseObject, error)
 }
 
 type StrictHandlerFunc = strictecho.StrictEchoHandlerFunc
@@ -1320,27 +1430,104 @@ func (sh *strictHandler) UserTokensDelete(ctx echo.Context, id int32) error {
 	return nil
 }
 
+// VersionsGetVersion operation middleware
+func (sh *strictHandler) VersionsGetVersion(ctx echo.Context) error {
+	var request VersionsGetVersionRequestObject
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.VersionsGetVersion(ctx.Request().Context(), request.(VersionsGetVersionRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "VersionsGetVersion")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(VersionsGetVersionResponseObject); ok {
+		return validResponse.VisitVersionsGetVersionResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// VersionsCheckUpdate operation middleware
+func (sh *strictHandler) VersionsCheckUpdate(ctx echo.Context) error {
+	var request VersionsCheckUpdateRequestObject
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.VersionsCheckUpdate(ctx.Request().Context(), request.(VersionsCheckUpdateRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "VersionsCheckUpdate")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(VersionsCheckUpdateResponseObject); ok {
+		return validResponse.VisitVersionsCheckUpdateResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// VersionsUpdate operation middleware
+func (sh *strictHandler) VersionsUpdate(ctx echo.Context) error {
+	var request VersionsUpdateRequestObject
+
+	var body VersionsUpdateJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.VersionsUpdate(ctx.Request().Context(), request.(VersionsUpdateRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "VersionsUpdate")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(VersionsUpdateResponseObject); ok {
+		return validResponse.VisitVersionsUpdateResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xZS4/bNhD+KwbbQwsoKyMpevBtN0WBAmm7yKOXhQ+MNJaYSiSXHKU1FvrvBUk9LcqW",
-	"Y8vFPk62JYoz880334zoBxKJXAoOHDVZPRAdpZBT+/VaSvMhlZCgkIG9GMOGFhn+RRWjHH+LzbWNUDlF",
-	"siKM45vXJCC4leB+QgKKlAGJQUeKSWSCmyeqBRoV44m5nwqNnObOBkPItXdZdYEqRbfmN5tqHxlm4Nmy",
-	"DIiC+4IpiMnqzuxXr+373PUwGIKwbmyKz18gQmPyWspqwRBFKuXZoIN/pdBwKxRO3HAyaCynCfxBc/Da",
-	"zSlG6U7CvlewISvyXdiSKqwYFbZ4/G6e9KVTgcxY5Nh3kaS2EXaM9yBt4wyqrO3PtYttkPAUaAzKi+NX",
-	"mhUToqh2qNd7vSgwfe/s9a1PznihQXF/wn2gNst93rxVQBE+aVAfxd/AvY5N4LYxeD2g9s8/nUbtjGr8",
-	"pI/YeYxrAUET3Qf38xQudlzqBt434AP6nUgYfw/3Q3gl1fofoWKv39Nz3awM2h33OOLJsw3hsCG3zLf1",
-	"nxYlmvVFtUcf8jGFBUIuM4qw2Ai1oHHMeLIQ1bOL1qcrE8qLIl9SkQcpbZThKcrCyWU/LIIyIBqiQjHc",
-	"fjAJdFDdUM0iI/zN8Gae+Wyutg6niJKUZgfGN8K66/wmP9gvP5q2Akq7OlpeLa+WJjghgVPJyIq8sZdM",
-	"+WNqzYZUspC6ATEBi5ZJIDVBmToyHVG/YxptY9VScO38fb1cmo9IcARXxFRaipknwy/aZdwx9BgiD8lb",
-	"7laqFQiTFdC4SKle6CKKAGKIrxxDaaJNsq6lfCs4KpFloMi6DIgUeiRE1+SIyzZovBHx9qj4DobVpxKq",
-	"AsoTIT1YB0cjV/OSrO56jLxbl+txXMugodGrr11RzwDBC3elVvrGyNUvbp0hpaI5ICht7TPj8H0BaksC",
-	"4hpcU3p9IIMOKLv1u368IFco7XB4rEprTKtinQCma5X7wDwc/PpCslAPC2dVBz/Asp7899P21i67GNDB",
-	"/oIYL4CRB20nOzrT59dGz0D4tKRyhGRjnajm2KwN6VmC7mlT4QOLy4m9am+bMvPUTm39n6r66JrWr4zH",
-	"N1srko8A3qm9aobeVOzH8bbAC0I4y6T8LAVpihC9KNA3vJuMS8/T0pzzviaPqMxTkJdn8SJeHSP5qV9g",
-	"ajebk5DVHxizBV5gOhp5mImEucNI/5BdYGpPuGcarptj/BmYNsGuPkUKxnAtNKhXzeG/l1fNMfDljgvb",
-	"k+fzHQs0e056YWuDnvV9rRPoZTnl+e9vrpr2Az8k4MFRqc3Jy8D0zbC3FfFQQ7QjDmXQ3un1of6N4eDb",
-	"ue8zXq7L/wIAAP//eFnfcMwiAAA=",
+	"H4sIAAAAAAAC/+xaTW/jNhP+KwLf99AC2jjYXfTgW5KiH8C2DXaTvQQ+0NLY4q4kMuQwrRHovxcU9WlR",
+	"shxbLvJxiiVRnJlnnnmGIvNIAp4InkKKiswfiQoiSGj+80II80dILkAig/xmCCuqY/xKJaMp/h6aeysu",
+	"E4pkTliKH94Tn+BGgL2ENUiS+SQEFUgmkPHUvFEMUChZujbPI64wpYm1wRAS5RxW3KBS0o25ZmPtI8MY",
+	"HFNmPpFwr5mEkMzvzHzl2LbPTQ/9LgiLyiZffoMAjckLIYoBXRSpEEeDDv4RXME1lzhywtGgsYSu4U+a",
+	"gNNuQjGIthL2fwkrMif/m9WkmhWMmtV4/GHedKVTgohZYNl3kqTWETaMtyCt4/SLrA3n2sbWSXgENATp",
+	"xPGBxnpEFMUM5XinFxqjz9Ze2/rojGsFMnUn3AVqNdzlzZUEinCrQN7w75A6HRvBbWPwokPtnz4eRu2Y",
+	"KrxVe8zcxzWfoInui708hIsNl5qBtw24gP7E1yz9DPddeAVV6m8uQ6ff43NdjfTrGQccceQ5D2G3ITvM",
+	"NfVfOUo0botqiz7kJgIPIRExRfBWXHo0DFm69njxrlf7dGZCeVPkUypyJ6WVMrxEWTi47F1F8BWkKiBp",
+	"47XULA5vWA8t1gx/oyra7WU9Tf1S14/MJwoCLRluvhgiWRcuqWKBaUDVItK8szR3a+AiREEyMwNLVzx3",
+	"yOJHfsh//GjaWxkkOT87Pzs3AXABKRWMzMmH/JaRIYxyszMq2Izaheoa8qwZYKgB19Sz6czqE1OYN3gl",
+	"eKqsv+/Pz82fgKcIVkyoyKlu3px9UxZmWyn7FFS3iLJtxciFyuAOCr2IKk/pIAAIITyzlULXyqTjQogr",
+	"nqLkcQySLDKfCK56QrTNlth8gsJLHm72im9nWG2yoNSQHQjpznrcG7mSl2R+12Lk3SJb9OOa+RWN3j00",
+	"m0sMCE64C9VUl0Y2f7bjDCklTQBBqtw+Mw7fa5Ab4hPbaCsJaAPpN0DZrtDF8wW5QGmLw31VWmJaFOsI",
+	"MG3LHgJzd/CLE8lCuWg5qjq4ARblF8gwba/zYScD2h8uiP4C6Hkx76h7Z/r42uhYmL4sqewhWV8nKjk2",
+	"aUN6laA72tTskYXZyF412KbMemqrtv5LVX12TesXloaXm1wknwG8Y3vVBL1JD+N4rfGEEE6yUn6VgjRG",
+	"iN4U6AnfJv3S87I057ifyT0q8xLk5VV8iBfbSG7qa4zyyaYkZHGQMlngGqPeyGcxXzO7yedeZGuM8p32",
+	"iRbX1XHCBEwbYVcdIgV9uGoF8l11COHkVbUdfbrtwnoH/HjbAtWcoz7Y6qAn/V5rBHpaTjnOIKeqaTfw",
+	"XQLuXCrVOXlbMB0K+0N9YuIs+uJERf0KWB6uTMjG0sTTq7uYYSjWmRYhtbwaDPkqguD7rR377GLu07My",
+	"uEZcT1Oz9vna6BO0gVOzEbr30XmmLcFjyku5VzjvIfcUpGF+xI0RUyWIvrfU6GEEnv1fEeUldOMtwdMK",
+	"Vjo+83ZTqX7+WCrLVk/N/PpJa/nWftD9Xmw8d9Vs43HXs2yR/RsAAP//GuQcgagmAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

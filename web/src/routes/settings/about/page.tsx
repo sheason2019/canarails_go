@@ -1,5 +1,6 @@
-import { Button, Link, Typography } from '@mui/material';
+import { Link, Typography } from '@mui/material';
 import Dependencies from './components/dependencies';
+import VersionData from './components/version-data';
 
 export default function About() {
   return (
@@ -7,11 +8,7 @@ export default function About() {
       <Typography sx={{ mb: 1 }} variant="h5">
         版本信息
       </Typography>
-      <Typography>Version</Typography>
-      <Typography>Version Hash</Typography>
-      <Typography>BuildTime</Typography>
-      <Typography>Channel</Typography>
-      <Button variant="contained">检查更新</Button>
+      <VersionData />
       <Dependencies />
       <Typography sx={{ mt: 3, mb: 1 }} variant="h5">
         项目信息

@@ -15,12 +15,4 @@ model Version {
 interface Versions {
   @get
   getVersion(): Version;
-
-  @get
-  @route("update")
-  checkUpdate(): Version | null;
-
-  @post
-  @route("update")
-  update(gitHash: string): void;
 }
